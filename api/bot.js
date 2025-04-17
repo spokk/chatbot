@@ -9,7 +9,7 @@ const { logRequest } = require('./utils/logger');
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 module.exports = async (req, res) => {
-  logRequest(req);
+  logRequest(req.body);
 
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
@@ -26,11 +26,18 @@ module.exports = async (req, res) => {
     const update = req.body;
 
     // Process the message and insert it into the DB
-    await collection.insertOne({
-      chatId: update?.message?.chat.id || update?.edited_message?.chat.id,
-      message: update?.message?.text || update?.edited_message?.text,
-      userName: update?.message?.from.first_name || update.message?.from.username || update?.edited_message?.from.first_name || update?.edited_message?.from.username
-    });
+    const hasIdAndText = (update?.message?.chat.id || update?.edited_message?.chat.id) && (update?.message?.text || update?.edited_message?.text)
+
+    const userName = update?.message?.from.first_name || update?.edited_message?.from.first_name || update.message?.from.username || update?.edited_message?.from.username
+
+    if (hasIdAndText) {
+      await collection.insertOne({
+        chatId: update?.message?.chat.id || update?.edited_message?.chat.id,
+        message: update?.message?.text || update?.edited_message?.text,
+        userName
+      });
+    }
+
 
     await bot.handleUpdate(update);
     res.status(200).send('OK');

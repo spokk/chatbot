@@ -1,7 +1,5 @@
 const { GoogleGenAI } = require('@google/genai');
 
-const { formatText } = require('../utils/helpers');
-
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 const MAX_TIME_TO_GENERATE = 50000;
@@ -11,7 +9,7 @@ const generateAIResponse = async (contents) => {
     model: "gemini-2.0-flash",
     contents,
     config: {
-      maxOutputTokens: 2000,
+      maxOutputTokens: 1600,
     }
   });
 
@@ -25,7 +23,6 @@ const generateAIResponse = async (contents) => {
     throw new Error("AI returned nothing.");
   }
 
-  // return formatText(response.text);
   return response.text
 };
 
@@ -35,7 +32,7 @@ const generateAISummary = async (contents) => {
     contents,
     config: {
       systemInstruction: 'This is the list of messages. Summarize the main points of the conversation. Prefer answer in Ukrainian unless the user asks in English.',
-      maxOutputTokens: 1000, // Limit tokens for a concise summary
+      maxOutputTokens: 700, // Limit tokens for a concise summary
     }
   });
 
@@ -49,7 +46,6 @@ const generateAISummary = async (contents) => {
     throw new Error("AI returned nothing.");
   }
 
-  // return formatText(response.text);
   return response.text
 };
 

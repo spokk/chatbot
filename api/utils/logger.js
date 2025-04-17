@@ -1,5 +1,5 @@
-const logRequest = (req) => {
-  console.log(JSON.stringify(req.body, null, 2));
+const logRequest = (data) => {
+  console.log(JSON.stringify(data, null, 2));
 };
 
 module.exports = { logRequest };

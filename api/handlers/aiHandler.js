@@ -1,16 +1,14 @@
 const handleAIMessage = async (ctx, generateAIResponse, generateAISummary, getMessagesFromDb) => {
-  const text = ctx.message.text;
+  const text = ctx.message.text.trim();
   const chatId = ctx.chat.id;
   const messageId = ctx.message.message_id;
 
   const mentionedBot = text.includes(`@${ctx.me}`);
   const startsWithAi = text.startsWith('/ai ');
 
-  const shouldGenerateSummary = text === '/sum' || text === '/summary';
+  const shouldGenerateSummary = text.startsWith('/sum') || text.startsWith(`/sum@${ctx.me}`)
 
   if (shouldGenerateSummary) {
-
-
     try {
       await ctx.sendChatAction('typing');
 
@@ -48,7 +46,21 @@ const handleAIMessage = async (ctx, generateAIResponse, generateAISummary, getMe
   try {
     await ctx.sendChatAction('typing');
     const response = await generateAIResponse(prompt);
-    await ctx.reply(response, { reply_to_message_id: messageId });
+
+    if (response.length > 4000) {
+      const chunkSize = 4000;
+      for (let i = 0; i < response.length; i += chunkSize) {
+        const chunk = response.slice(i, i + chunkSize); // Slice the response into chunks
+        if (i === 0) {
+          await ctx.reply(chunk, { reply_to_message_id: messageId });
+        } else {
+          await ctx.reply(chunk);
+        }
+      }
+    } else {
+      await ctx.reply(response, { reply_to_message_id: messageId });
+    }
+
   } catch (err) {
     console.error('AI error:', err);
     await ctx.reply('⚠️ Error while communicating with AI');
