@@ -1,8 +1,8 @@
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const { message } = require('telegraf/filters');
-const { connectToDb } = require('./services/dbService');
-const { generateAIResponse } = require('./services/aiService');
+const { connectToDb, getMessagesFromDb } = require('./services/dbService');
+const { generateAIResponse, generateAISummary } = require('./services/aiService');
 const { handleAIMessage } = require('./handlers/aiHandler');
 const { logRequest } = require('./utils/logger');
 
@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
   bot.on(message('text'), async (ctx) => {
-    await handleAIMessage(ctx, generateAIResponse);
+    await handleAIMessage(ctx, generateAIResponse, generateAISummary, getMessagesFromDb);
   });
 
   // Connect to MongoDB
@@ -26,7 +26,11 @@ module.exports = async (req, res) => {
     const update = req.body;
 
     // Process the message and insert it into the DB
-    await collection.insertOne(update);
+    await collection.insertOne({
+      chatId: update?.message?.chat.id || update?.edited_message?.chat.id,
+      message: update?.message?.text || update?.edited_message?.text,
+      userName: update?.message?.from.first_name || update.message?.from.username || update?.edited_message?.from.first_name || update?.edited_message?.from.username
+    });
 
     await bot.handleUpdate(update);
     res.status(200).send('OK');

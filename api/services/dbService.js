@@ -26,4 +26,26 @@ const connectToDb = async () => {
   return client;
 };
 
-module.exports = { connectToDb };
+const getMessagesFromDb = async (chatId, limit) => {
+  if (!client) {
+    throw new Error('MongoDB client is not connected');
+  }
+
+  const db = client.db('tg_db');
+  const collection = db.collection('messages');
+
+  try {
+    const messages = await collection
+      .find({ chatId })
+      .sort({ _id: -1 })
+      .limit(limit)
+      .toArray();
+
+    return messages;
+  } catch (error) {
+    console.error('Error fetching messages from DB:', error);
+    throw new Error('Failed to fetch messages from DB');
+  }
+}
+
+module.exports = { connectToDb, getMessagesFromDb };

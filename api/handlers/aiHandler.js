@@ -1,7 +1,41 @@
-const handleAIMessage = async (ctx, generateAIResponse) => {
+const handleAIMessage = async (ctx, generateAIResponse, generateAISummary, getMessagesFromDb) => {
   const text = ctx.message.text;
+  const chatId = ctx.chat.id;
+  const messageId = ctx.message.message_id;
+
   const mentionedBot = text.includes(`@${ctx.me}`);
   const startsWithAi = text.startsWith('/ai ');
+
+  const shouldGenerateSummary = text === '/sum' || text === '/summary';
+
+  if (shouldGenerateSummary) {
+
+
+    try {
+      await ctx.sendChatAction('typing');
+
+      const chatMessages = await getMessagesFromDb(chatId, 30);
+
+      console.log('Chat messages:', chatMessages);
+
+      if (chatMessages.length === 0) {
+        await ctx.reply('⚠️ No messages found to summarize.');
+        return;
+      }
+
+      const summary = await generateAISummary(JSON.stringify(chatMessages, null, 2));
+
+      if (!summary) {
+        await ctx.reply('⚠️ AI returned no summary.', { reply_to_message_id: messageId });
+        return;
+      }
+
+      await ctx.reply(summary, { reply_to_message_id: messageId });
+    } catch (err) {
+      console.error('AI summary error:', err);
+      await ctx.reply('⚠️ Error while communicating with AI for summary');
+    }
+  }
 
   if (!mentionedBot && !startsWithAi) return;
 
@@ -14,7 +48,7 @@ const handleAIMessage = async (ctx, generateAIResponse) => {
   try {
     await ctx.sendChatAction('typing');
     const response = await generateAIResponse(prompt);
-    await ctx.reply(response, { parse_mode: 'Markdown', reply_to_message_id: ctx.message.message_id });
+    await ctx.reply(response, { reply_to_message_id: messageId });
   } catch (err) {
     console.error('AI error:', err);
     await ctx.reply('⚠️ Error while communicating with AI');

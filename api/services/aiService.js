@@ -1,19 +1,22 @@
 const { GoogleGenAI } = require('@google/genai');
 
+const { formatText } = require('../utils/helpers');
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
+
+const MAX_TIME_TO_GENERATE = 50000;
 
 const generateAIResponse = async (contents) => {
   const aiRequest = ai.models.generateContent({
     model: "gemini-2.0-flash",
     contents,
     config: {
-      systemInstruction: 'Respond in Markdown format suitable for Telegram.',
-      maxOutputTokens: 3800,
+      maxOutputTokens: 2000,
     }
   });
 
   const timeout = new Promise((resolve) =>
-    setTimeout(() => resolve({ text: '⚠️ AI is taking too long to respond.' }), 50000)
+    setTimeout(() => resolve({ text: '⚠️ AI is taking too long to respond.' }), MAX_TIME_TO_GENERATE)
   );
 
   const response = await Promise.race([aiRequest, timeout]);
@@ -22,14 +25,32 @@ const generateAIResponse = async (contents) => {
     throw new Error("AI returned nothing.");
   }
 
-  // Ensure the response is safe for Telegram Markdown
-  const formattedText = response.text
-    .replace(/_/g, '\\_') // Escape underscores
-    .replace(/\*/g, '\\*') // Escape asterisks
-    .replace(/\[/g, '\\[') // Escape square brackets
-    .replace(/`/g, '\\`'); // Escape backticks
-
-  return formattedText;
+  // return formatText(response.text);
+  return response.text
 };
 
-module.exports = { generateAIResponse };
+const generateAISummary = async (contents) => {
+  const aiRequest = ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents,
+    config: {
+      systemInstruction: 'This is the list of messages. Summarize the main points of the conversation. Prefer answer in Ukrainian unless the user asks in English.',
+      maxOutputTokens: 1000, // Limit tokens for a concise summary
+    }
+  });
+
+  const timeout = new Promise((resolve) =>
+    setTimeout(() => resolve({ text: '⚠️ AI is taking too long to respond.' }), MAX_TIME_TO_GENERATE)
+  );
+
+  const response = await Promise.race([aiRequest, timeout]);
+
+  if (!response?.text) {
+    throw new Error("AI returned nothing.");
+  }
+
+  // return formatText(response.text);
+  return response.text
+};
+
+module.exports = { generateAIResponse, generateAISummary };
