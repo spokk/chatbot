@@ -4,6 +4,7 @@ const { message } = require('telegraf/filters');
 const { connectToDb, getMessagesFromDb } = require('./services/dbService');
 const { generateAIResponse, generateAISummary } = require('./services/aiService');
 const { handleAIMessage } = require('./handlers/aiHandler');
+const { insertMessageToDb } = require('./handlers/dbHandler');
 const { logRequest } = require('./utils/logger');
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
@@ -25,23 +26,8 @@ module.exports = async (req, res) => {
   try {
     const update = req.body;
 
-    // Process the message and insert it into the DB
-    const hasIdAndText = (update?.message?.chat.id || update?.edited_message?.chat.id) && (update?.message?.text || update?.edited_message?.text)
-
-    const isCommand = update?.message?.text?.startsWith('/') || update?.edited_message?.text?.startsWith('/');
-
-    if (!isCommand) {
-      const userName = update?.message?.from.first_name || update?.edited_message?.from.first_name || update.message?.from.username || update?.edited_message?.from.username
-
-      if (hasIdAndText) {
-        await collection.insertOne({
-          chatId: update?.message?.chat.id || update?.edited_message?.chat.id,
-          message: update?.message?.text || update?.edited_message?.text,
-          userName,
-          createdAt: new Date()
-        });
-      }
-    }
+    // Insert message into the database
+    await insertMessageToDb(update, collection);
 
     await bot.handleUpdate(update);
     res.status(200).send('OK');
