@@ -28,17 +28,20 @@ module.exports = async (req, res) => {
     // Process the message and insert it into the DB
     const hasIdAndText = (update?.message?.chat.id || update?.edited_message?.chat.id) && (update?.message?.text || update?.edited_message?.text)
 
-    const userName = update?.message?.from.first_name || update?.edited_message?.from.first_name || update.message?.from.username || update?.edited_message?.from.username
+    const isCommand = update?.message?.text?.startsWith('/') || update?.edited_message?.text?.startsWith('/');
 
-    if (hasIdAndText) {
-      await collection.insertOne({
-        chatId: update?.message?.chat.id || update?.edited_message?.chat.id,
-        message: update?.message?.text || update?.edited_message?.text,
-        userName,
-        createdAt: new Date()
-      });
+    if (!isCommand) {
+      const userName = update?.message?.from.first_name || update?.edited_message?.from.first_name || update.message?.from.username || update?.edited_message?.from.username
+
+      if (hasIdAndText) {
+        await collection.insertOne({
+          chatId: update?.message?.chat.id || update?.edited_message?.chat.id,
+          message: update?.message?.text || update?.edited_message?.text,
+          userName,
+          createdAt: new Date()
+        });
+      }
     }
-
 
     await bot.handleUpdate(update);
     res.status(200).send('OK');

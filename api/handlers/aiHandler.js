@@ -12,7 +12,7 @@ const handleAIMessage = async (ctx, generateAIResponse, generateAISummary, getMe
     try {
       await ctx.sendChatAction('typing');
 
-      const chatMessages = await getMessagesFromDb(chatId, 30);
+      const chatMessages = await getMessagesFromDb(chatId, 50);
 
       console.log('Chat messages:', chatMessages);
 
