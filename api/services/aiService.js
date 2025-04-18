@@ -9,7 +9,7 @@ const generateAIResponse = async (contents) => {
     model: "gemini-2.0-flash",
     contents,
     config: {
-      maxOutputTokens: 1600,
+      maxOutputTokens: 900,
     }
   });
 
@@ -31,8 +31,8 @@ const generateAISummary = async (contents) => {
     model: "gemini-2.0-flash",
     contents,
     config: {
-      systemInstruction: 'This is the list of messages. Summarize the main points of the conversation. Prefer answer in Ukrainian unless the user asks in English.',
-      maxOutputTokens: 700, // Limit tokens for a concise summary
+      systemInstruction: 'This is the list of messages. Do a short summary of the key points of the conversation. Ignore commands like "/ai" and "/sum". Prefer answer in Ukrainian unless the user asks in English.',
+      maxOutputTokens: 500, // Limit tokens for a concise summary
     }
   });
 
