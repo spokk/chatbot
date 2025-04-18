@@ -34,7 +34,8 @@ module.exports = async (req, res) => {
       await collection.insertOne({
         chatId: update?.message?.chat.id || update?.edited_message?.chat.id,
         message: update?.message?.text || update?.edited_message?.text,
-        userName
+        userName,
+        createdAt: new Date()
       });
     }
 
