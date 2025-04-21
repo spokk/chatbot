@@ -1,7 +1,7 @@
 const { clearText } = require('../utils/text');
 
-const insertMessageToDb = async (data, collection) => {
-  const messageData = extractMessageData(data);
+const insertMessageToDb = async (body, collection) => {
+  const messageData = extractMessageData(body);
 
   if (!messageData) return;
 
@@ -17,8 +17,8 @@ const insertMessageToDb = async (data, collection) => {
 };
 
 // Helper function to extract message data
-const extractMessageData = (update) => {
-  const message = update?.message || update?.edited_message;
+const extractMessageData = (body) => {
+  const message = body?.message || body?.edited_message;
 
   if (!message || !message.chat?.id || !message.text) return null;
 

@@ -1,8 +1,7 @@
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const { message } = require('telegraf/filters');
-const { connectToDb, getMessagesFromDb } = require('./services/dbService');
-const { generateAIResponse, generateAISummary } = require('./services/aiService');
+const { connectToDb } = require('./services/dbService');
 const { handleAIMessage } = require('./handlers/aiHandler');
 const { insertMessageToDb } = require('./handlers/dbHandler');
 const { logRequest } = require('./utils/logger');
@@ -14,9 +13,7 @@ module.exports = async (req, res) => {
 
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
-  bot.on(message('text'), async (ctx) => {
-    await handleAIMessage(ctx, generateAIResponse, generateAISummary, getMessagesFromDb);
-  });
+  bot.on(message('text'), async (ctx) => { await handleAIMessage(ctx) });
 
   // Connect to MongoDB
   const dbClient = await connectToDb();
@@ -25,6 +22,7 @@ module.exports = async (req, res) => {
 
   try {
     await insertMessageToDb(req.body, collection);
+
     await bot.handleUpdate(req.body);
 
     res.status(200).send('OK');

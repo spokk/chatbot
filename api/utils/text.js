@@ -1,9 +1,9 @@
 const clearText = (text, botUsername) => {
   return text
-    .replace(`/ai`, '')
     .replace(`/ai@${botUsername}`, '')
-    .replace(`/sum`, '')
     .replace(`/sum@${botUsername}`, '')
+    .replace(`/ai`, '')
+    .replace(`/sum`, '')
     .trim();
 };
 
