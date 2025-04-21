@@ -9,6 +9,7 @@ const generateAIResponse = async (contents) => {
     model: "gemini-2.0-flash",
     contents,
     config: {
+      systemInstruction: 'Prefer answer in Ukrainian unless the user asks in English. Prioritize short and concise answers.',
       maxOutputTokens: 900,
     }
   });
@@ -31,7 +32,7 @@ const generateAISummary = async (contents) => {
     model: "gemini-2.0-flash",
     contents,
     config: {
-      systemInstruction: 'This is the list of messages. Do a short summary of the key points of the conversation. Ignore commands like "/ai" and "/sum". Prefer answer in Ukrainian unless the user asks in English.',
+      systemInstruction: 'This is the list of messages. Do a short summary of the key points of the conversation. Ignore commands like "/ai" and "/sum". Prefer answer in Ukrainian unless the user asks in English. Prioritize short and concise answers.',
       maxOutputTokens: 500, // Limit tokens for a concise summary
     }
   });
