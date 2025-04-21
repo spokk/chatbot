@@ -1,3 +1,5 @@
+const { clearText } = require('../utils/text');
+
 // Helper function to send the response in chunks
 const sendResponseInChunks = async (ctx, response, messageId) => {
   const chunkSize = 4000;
@@ -19,15 +21,6 @@ const getShouldProcessMessage = (text, botUsername) => {
 // Helper function to check if a summary should be generated
 const getShouldGenerateSummary = (text, botUsername) => {
   return text.startsWith('/sum') || text.startsWith(`/sum@${botUsername}`);
-};
-
-const cleanPrompt = (text, botUsername) => {
-  return text
-    .replace(`/ai`, '')
-    .replace(`/ai@${botUsername}`, '')
-    .replace(`/sum`, '')
-    .replace(`/sum@${botUsername}`, '')
-    .trim();
 };
 
 // Helper function to handle summary requests
@@ -54,6 +47,19 @@ const handleSummaryRequest = async (ctx, chatId, messageId, getMessagesFromDb, g
   }
 };
 
+// Helper function to build AI context
+const buildAIContext = (ctx, prompt) => {
+  const isReply = ctx.message?.reply_to_message;
+  const repliedMessage = ctx.message?.reply_to_message?.text;
+
+  if (isReply && repliedMessage) {
+    const cleanRepliedMessage = clearText(repliedMessage, ctx.me);
+    return `Text to process: "${cleanRepliedMessage}". Request: "${prompt}"`;
+  }
+
+  return prompt;
+};
+
 const handleAIMessage = async (ctx, generateAIResponse, generateAISummary, getMessagesFromDb) => {
   const text = ctx.message.text.trim();
   const chatId = ctx.chat.id;
@@ -69,20 +75,16 @@ const handleAIMessage = async (ctx, generateAIResponse, generateAISummary, getMe
 
   if (!shouldProcessMessage) return;
 
-  const prompt = cleanPrompt(text, ctx.me);
-
-  if (!prompt) return;
-
   try {
+    const prompt = clearText(text, ctx.me);
+    if (!prompt) return;
+
     await ctx.sendChatAction('typing');
 
-    const isReply = ctx.message?.reply_to_message;
-    const repliedMessage = ctx.message?.reply_to_message?.text;
-
-    const response = await generateAIResponse(isReply && repliedMessage ? `${repliedMessage} ${prompt}` : prompt);
+    const aiContext = buildAIContext(ctx, prompt);
+    const response = await generateAIResponse(aiContext);
 
     await sendResponseInChunks(ctx, response, messageId);
-
   } catch (err) {
     console.error('AI error:', err);
     await ctx.reply('⚠️ Error while communicating with AI');

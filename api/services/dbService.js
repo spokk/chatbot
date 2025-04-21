@@ -27,16 +27,23 @@ const connectToDb = async () => {
 };
 
 const getMessagesFromDb = async (chatId, limit) => {
-  if (!client) {
-    throw new Error('MongoDB client is not connected');
-  }
+  if (!client) throw new Error('MongoDB client is not connected');
 
   const db = client.db('tg_db');
   const collection = db.collection('messages');
 
   try {
+    // Get the start and end of the current day
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0); // Set time to 00:00:00.000
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999); // Set time to 23:59:59.999
+
     const messages = await collection
-      .find({ chatId })
+      .find({
+        chatId,
+        createdAt: { $gte: startOfDay, $lt: endOfDay }, // Filter by current day
+      })
       .sort({ _id: -1 })
       .limit(limit)
       .toArray();

@@ -24,12 +24,9 @@ module.exports = async (req, res) => {
   const collection = db.collection('messages');
 
   try {
-    const update = req.body;
+    await insertMessageToDb(req.body, collection);
+    await bot.handleUpdate(req.body);
 
-    // Insert message into the database
-    await insertMessageToDb(update, collection);
-
-    await bot.handleUpdate(update);
     res.status(200).send('OK');
   } catch (err) {
     console.error('Update handling failed:', err);

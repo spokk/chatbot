@@ -1,26 +1,38 @@
-const insertMessageToDb = async (update, collection) => {
-  const hasIdAndText =
-    (update?.message?.chat.id || update?.edited_message?.chat.id) &&
-    (update?.message?.text || update?.edited_message?.text);
+const { clearText } = require('../utils/text');
 
-  const isCommand =
-    update?.message?.text?.startsWith('/sum') ||
-    update?.edited_message?.text?.startsWith('/sum');
+const insertMessageToDb = async (data, collection) => {
+  const messageData = extractMessageData(data);
 
-  if (!isCommand && hasIdAndText) {
-    const userName =
-      update?.message?.from.first_name ||
-      update?.edited_message?.from.first_name ||
-      update?.message?.from.username ||
-      update?.edited_message?.from.username;
+  if (!messageData) return;
 
-    await collection.insertOne({
-      chatId: update?.message?.chat.id || update?.edited_message?.chat.id,
-      message: update?.message?.text || update?.edited_message?.text,
-      userName,
-      createdAt: new Date(),
-    });
-  }
+  const { chatId, text, userName } = messageData;
+
+  // Insert the message into the database
+  await collection.insertOne({
+    chatId,
+    message: text,
+    userName,
+    createdAt: new Date(),
+  });
+};
+
+// Helper function to extract message data
+const extractMessageData = (update) => {
+  const message = update?.message || update?.edited_message;
+
+  if (!message || !message.chat?.id || !message.text) return null;
+
+  const isCommand = message.text.startsWith('/sum');
+
+  if (isCommand) return null;
+
+  const userName = message.from?.first_name || message.from?.username;
+
+  return {
+    chatId: message.chat.id,
+    text: clearText(message.text),
+    userName,
+  };
 };
 
 module.exports = { insertMessageToDb };
