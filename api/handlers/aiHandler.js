@@ -12,7 +12,7 @@ const handleAIMessage = async (ctx) => {
     return;
   }
 
-  if (!shouldProcessMessage(text, ctx.me)) return;
+  if (!shouldProcessMessage(text, ctx)) return;
 
   const prompt = clearText(text, ctx.me);
   if (!prompt) return;
@@ -50,6 +50,8 @@ const processAIRequest = async (ctx, prompt, messageId) => {
     await ctx.sendChatAction('typing');
     const aiContext = buildAIContext(ctx, prompt);
     const response = await generateAIResponse(aiContext);
+    console.log('AI response:', response);
+
     await sendResponseInChunks(ctx, response, messageId);
   } catch (err) {
     console.error('AI request error:', err);
@@ -60,15 +62,27 @@ const processAIRequest = async (ctx, prompt, messageId) => {
 // Helper function to send the response in chunks
 const sendResponseInChunks = async (ctx, response, messageId) => {
   const chunkSize = 4000;
+
   for (let i = 0; i < response.length; i += chunkSize) {
     const chunk = response.slice(i, i + chunkSize);
-    await ctx.reply(chunk, { reply_to_message_id: i === 0 ? messageId : undefined });
+
+    try {
+      await ctx.reply(chunk, i === 0 ? { reply_to_message_id: messageId } : {});
+    } catch (err) {
+      console.error(`Failed to send chunk: ${chunk}`, err);
+      // Continue to the next chunk even if one fails
+    }
   }
 };
 
 // Helper function to check if the message should be processed
-const shouldProcessMessage = (text, botUsername) => {
-  return text.includes(`@${botUsername}`) || text.startsWith('/ai') || text.startsWith(`/ai@${botUsername}`);
+const shouldProcessMessage = (text, ctx) => {
+  return text.includes(`@${ctx.me}`) ||
+    text.startsWith('/ai') ||
+    text.startsWith(`/ai@${ctx.me}`) ||
+    ctx.message?.reply_to_message?.text?.trim() === "/ai" ||
+    ctx.message?.reply_to_message?.text?.trim() === `/ai@${ctx.me}`;
+
 };
 
 // Helper function to check if a summary should be generated
