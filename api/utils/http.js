@@ -10,6 +10,4 @@ const downloadImageAsBuffer = async (imageURL) => {
   return Buffer.from(response.data);
 };
 
-module.exports = {
-  downloadImageAsBuffer,
-};
+module.exports = { downloadImageAsBuffer };

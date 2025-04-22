@@ -1,9 +1,6 @@
-const { Blob } = require('buffer');
-
-const { GoogleGenAI, createUserContent, createPartFromUri } = require('@google/genai');
+const { GoogleGenAI } = require('@google/genai');
 
 const { log } = require('../utils/logger');
-const { getMimeType } = require('../utils/media');
 const { downloadImageAsBuffer } = require('../utils/http');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
@@ -62,21 +59,18 @@ const generateAIImageResponse = async (imageURL, caption) => {
     // Step 1: Download the image as a buffer
     const imageBuffer = await downloadImageAsBuffer(imageURL);
 
-    // Step 2: Determine the MIME type
-    const mimeType = getMimeType(imageURL);
+    // Step 2: Convert the buffer to a base64
+    const base64ImageData = Buffer.from(imageBuffer).toString('base64');
 
-    // Step 3: Convert the buffer to a Blob
-    const blob = new Blob([imageBuffer], { type: mimeType });
-
-    // Step 4: Upload the image to the AI service
-    const image = await uploadImageToAI(blob, mimeType, imageBuffer.length);
-
-    // Step 5: Prepare and generate AI content
+    // Step 3: Prepare and generate AI content
     const contents = [
-      createUserContent([
-        `Prefer quick response. ${caption}`,
-        createPartFromUri(image.uri, mimeType),
-      ]),
+      {
+        inlineData: {
+          mimeType: 'image/jpeg',
+          data: base64ImageData,
+        },
+      },
+      { text: caption }
     ];
 
     return generateAIContent(contents, baseInstructions, MAX_OUTPUT_TOKENS_CHAT);
@@ -84,16 +78,6 @@ const generateAIImageResponse = async (imageURL, caption) => {
     console.error('Error processing image request:', error);
     throw error;
   }
-};
-
-// Helper function to upload the image to the AI service
-const uploadImageToAI = async (blob, mimeType, sizeBytes) => {
-  return await ai.files.upload({
-    file: blob,
-    config: {
-      mimeType: mimeType,
-    },
-  });
 };
 
 module.exports = { generateAIResponse, generateAISummary, generateAIImageResponse };
