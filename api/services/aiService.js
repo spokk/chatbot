@@ -40,14 +40,14 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
 
 // Function to generate AI response
 const generateAIResponse = async (contents) => {
-  const systemInstruction = 'Prefer answer in Ukrainian unless the user asks otherwise. Prioritize short and concise answer.';
+  const systemInstruction = 'Prefer answer in Ukrainian unless the user asks otherwise. Prioritize short and concise answer. Do not use special characters.';
 
   return generateAIContent(contents, systemInstruction, MAX_OUTPUT_TOKENS_CHAT);
 };
 
 // Function to generate AI summary
 const generateAISummary = async (contents) => {
-  const systemInstruction = 'This is the list of messages. Make a short summary of the key points of the conversation. Prefer answer in Ukrainian unless the user asks in English. Prioritize short and concise answer.';
+  const systemInstruction = 'This is the list of messages. Make a short summary of the key points of the conversation. Prefer answer in Ukrainian. Prioritize short and concise answer. Do not use special characters.';
 
   return generateAIContent(contents, systemInstruction, MAX_OUTPUT_TOKENS_SUMMARY);
 };
