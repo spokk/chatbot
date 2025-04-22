@@ -3,6 +3,7 @@ const { Telegraf } = require('telegraf');
 const { message } = require('telegraf/filters');
 const { connectToDb } = require('./services/dbService');
 const { handleAIMessage } = require('./handlers/aiHandler');
+const { handleAIImageMessage } = require('./handlers/imageHandler');
 const { insertMessageToDb } = require('./handlers/dbHandler');
 const { log } = require('./utils/logger');
 
@@ -13,7 +14,9 @@ module.exports = async (req, res) => {
 
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
-  bot.on(message('text'), async (ctx) => { await handleAIMessage(ctx) });
+  bot.on(message("text"), async (ctx) => { await handleAIMessage(ctx) });
+
+  bot.on(message("photo"), async (ctx) => { await handleAIImageMessage(ctx) });
 
   // Connect to MongoDB
   const dbClient = await connectToDb();

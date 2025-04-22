@@ -10,8 +10,10 @@
   "license": "MIT",
   "description": "AI Chatbot for Telegram using Google GenAI",
   "dependencies": {
-    "@google/genai": "^0.8.0",
+    "@google/genai": "^0.9.0",
+    "axios": "^1.8.4",
     "dotenv": "^16.5.0",
+    "mime-types": "^3.0.1",
     "mongodb": "^6.15.0",
     "node-telegram-bot-api": "^0.66.0",
     "telegraf": "^4.16.3"
