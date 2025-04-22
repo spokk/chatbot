@@ -97,7 +97,7 @@ const shouldProcessMessage = (text, ctx) => {
 
 // Helper function to check if a summary should be generated
 const shouldGenerateSummary = (text, botUsername) => {
-  return text.startsWith('/sum') || text.startsWith(`/sum@${botUsername}`);
+  return text?.trim() === '/sum' || text?.trim() === `/sum@${botUsername}`;
 };
 
 // Helper function to build AI context

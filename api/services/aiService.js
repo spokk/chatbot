@@ -9,7 +9,7 @@ const MAX_TIME_TO_GENERATE = 50000; // 50 seconds
 const MAX_OUTPUT_TOKENS_CHAT = 800; // For Chat Responses: Use 500–900 tokens to keep responses concise and relevant.
 const MAX_OUTPUT_TOKENS_SUMMARY = 450; // For Summaries: Use 300–500 tokens to ensure the summary is short and to the point.
 
-const baseInstructions = 'Prefer answer in Ukrainian. Prioritize short and concise answer. Do not use special characters.';
+const baseInstructions = 'Prioritize short and concise answer. Do not use special characters.';
 
 // Helper function to handle timeouts
 const withTimeout = async (promise, timeoutMs) => {
@@ -19,6 +19,29 @@ const withTimeout = async (promise, timeoutMs) => {
   return Promise.race([promise, timeout]);
 };
 
+const safetySettings = [
+  {
+    category: "HARM_CATEGORY_HARASSMENT",
+    threshold: "BLOCK_ONLY_HIGH",
+  },
+  {
+    category: "HARM_CATEGORY_HATE_SPEECH",
+    threshold: "BLOCK_ONLY_HIGH",
+  },
+  {
+    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+    threshold: "BLOCK_ONLY_HIGH",
+  },
+  {
+    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+    threshold: "BLOCK_ONLY_HIGH",
+  },
+  {
+    category: "HARM_CATEGORY_CIVIC_INTEGRITY",
+    threshold: "BLOCK_ONLY_HIGH",
+  },
+];
+
 // Helper function to generate AI content
 const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
   log(contents, 'AI content generation input:');
@@ -27,6 +50,7 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
     model: "gemini-2.0-flash",
     contents,
     config: {
+      safetySettings: safetySettings,
       systemInstruction,
       maxOutputTokens,
     },
@@ -48,7 +72,7 @@ const generateAIResponse = async (contents) => {
 
 // Function to generate AI summary
 const generateAISummary = async (contents) => {
-  const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation. ${baseInstructions}`;
+  const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation. Prefer answer in Ukrainian. ${baseInstructions}`;
 
   return generateAIContent(contents, systemInstruction, MAX_OUTPUT_TOKENS_SUMMARY);
 };
