@@ -1,6 +1,7 @@
 const { getMessagesFromDb } = require('../services/dbService');
 const { generateAIResponse, generateAISummary } = require('../services/aiService');
 const { clearText } = require('../utils/text');
+const { decryptText } = require('../utils/crypto');
 
 // Main function to handle AI messages
 const handleAIMessage = async (ctx) => {
@@ -24,14 +25,19 @@ const handleAIMessage = async (ctx) => {
 const processSummaryRequest = async (ctx, chatId, messageId) => {
   try {
     await ctx.sendChatAction('typing');
-    const chatMessages = await getMessagesFromDb(chatId, 50);
+    const messages = await getMessagesFromDb(chatId, 50);
 
-    if (!chatMessages || chatMessages.length === 0) {
+    const decryptedMessages = messages.map((message) => ({
+      ...message,
+      message: decryptText(message.message),
+    }));
+
+    if (!decryptedMessages || decryptedMessages.length === 0) {
       await ctx.reply('⚠️ No messages found to summarize.');
       return;
     }
 
-    const summary = await generateAISummary(JSON.stringify(chatMessages, null, 2));
+    const summary = await generateAISummary(JSON.stringify(decryptedMessages, null, 2));
     if (!summary) {
       await ctx.reply('⚠️ AI returned no summary.', { reply_to_message_id: messageId });
       return;
@@ -97,7 +103,7 @@ const buildAIContext = (ctx, prompt) => {
 
   if (isReply && repliedMessage) {
     const cleanRepliedMessage = clearText(repliedMessage, ctx.me);
-    return `Text to process: "${cleanRepliedMessage}". Request: "${prompt}"`;
+    return `Text to process: "${cleanRepliedMessage}". Request: "${prompt}".`;
   }
 
   return prompt;

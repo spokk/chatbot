@@ -1,5 +1,7 @@
 const { clearText } = require('../utils/text');
 
+const { encryptText } = require('../utils/crypto');
+
 const insertMessageToDb = async (body, collection) => {
   const messageData = extractMessageData(body);
 
@@ -7,10 +9,16 @@ const insertMessageToDb = async (body, collection) => {
 
   const { chatId, text, userName } = messageData;
 
-  // Insert the message into the database
+  const clearedText = clearText(text)
+
+  if (!clearedText) return;
+
+  // Encrypt the message text before inserting
+  const encryptedText = encryptText(clearedText);
+
   await collection.insertOne({
     chatId,
-    message: text,
+    message: encryptedText,
     userName,
     createdAt: new Date(),
   });
@@ -30,7 +38,7 @@ const extractMessageData = (body) => {
 
   return {
     chatId: message.chat.id,
-    text: clearText(message.text),
+    text: message.text,
     userName,
   };
 };
