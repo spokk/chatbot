@@ -1,5 +1,7 @@
 const { GoogleGenAI } = require('@google/genai');
 
+const { log } = require('../utils/logger');
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 const MAX_TIME_TO_GENERATE = 50000; // 50 seconds
@@ -16,6 +18,8 @@ const withTimeout = async (promise, timeoutMs) => {
 
 // Helper function to generate AI content
 const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
+  log(contents, 'AI content generation input:');
+
   const aiRequest = ai.models.generateContent({
     model: "gemini-2.0-flash",
     contents,
@@ -28,6 +32,8 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
   const response = await withTimeout(aiRequest, MAX_TIME_TO_GENERATE);
 
   if (!response?.text) throw new Error("⚠️ AI returned nothing.");
+
+  log(response.text, 'AI content generation response:');
 
   return response.text;
 };

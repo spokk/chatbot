@@ -4,12 +4,12 @@ const { message } = require('telegraf/filters');
 const { connectToDb } = require('./services/dbService');
 const { handleAIMessage } = require('./handlers/aiHandler');
 const { insertMessageToDb } = require('./handlers/dbHandler');
-const { logRequest } = require('./utils/logger');
+const { log } = require('./utils/logger');
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 module.exports = async (req, res) => {
-  logRequest(req.body);
+  log(req.body, 'Received request body:');
 
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 

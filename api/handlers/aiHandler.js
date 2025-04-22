@@ -73,7 +73,11 @@ const sendResponseInChunks = async (ctx, response, messageId) => {
     const chunk = response.slice(i, i + chunkSize);
 
     try {
-      await ctx.reply(chunk, i === 0 ? { reply_to_message_id: messageId } : {});
+      if (i === 0) {
+        await ctx.reply(chunk, { reply_to_message_id: messageId });
+      } else {
+        await ctx.reply(chunk);
+      }
     } catch (err) {
       console.error(`Failed to send chunk: ${chunk}`, err);
       // Continue to the next chunk even if one fails
@@ -99,11 +103,10 @@ const shouldGenerateSummary = (text, botUsername) => {
 // Helper function to build AI context
 const buildAIContext = (ctx, prompt) => {
   const isReply = ctx.message?.reply_to_message;
-  const repliedMessage = ctx.message?.reply_to_message?.text;
+  const repliedMessage = clearText(ctx.message?.reply_to_message?.text, ctx.me);
 
   if (isReply && repliedMessage) {
-    const cleanRepliedMessage = clearText(repliedMessage, ctx.me);
-    return `Text to process: "${cleanRepliedMessage}". Request: "${prompt}".`;
+    return `Text to process: "${repliedMessage}". Request: "${prompt}".`;
   }
 
   return prompt;
