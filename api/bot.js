@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const { Telegraf } = require('telegraf');
+const { message } = require('telegraf/filters');
 
 const { connectToDb } = require('./services/dbService');
 const { handleAIMessage } = require('./handlers/aiHandler');
@@ -16,7 +17,11 @@ module.exports = async (req, res) => {
 
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
+  // Reply
   bot.command('img', async (ctx) => { await handleAIImageMessage(ctx) })
+
+  // Img with caption
+  bot.on(message('photo'), async (ctx) => { await handleAIImageMessage(ctx) });
 
   bot.command('ai', async (ctx) => { await handleAIMessage(ctx) })
 
@@ -28,9 +33,7 @@ module.exports = async (req, res) => {
   const collection = db.collection('messages');
 
   try {
-    await insertMessageToDb(req.body, collection);
-
-    await bot.handleUpdate(req.body);
+    await Promise.all([bot.handleUpdate(req.body), insertMessageToDb(req.body, collection)]);
 
     res.status(200).send('OK');
   } catch (err) {

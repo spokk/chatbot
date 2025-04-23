@@ -4,8 +4,15 @@
 const { generateAIImageResponse } = require('../services/aiService');
 const { clearText } = require('../utils/text');
 
+const getIsImgCommand = (ctx) => {
+  const imgCmd = `/img`;
+  const text = ctx.message?.caption || ctx.message?.text || '';
+
+  return text.startsWith(imgCmd) || text.startsWith(`${imgCmd}@${ctx.me}`);
+}
+
 const getImageToProcess = (ctx) => {
-  const prompt = clearText(ctx.message?.caption?.trim(), ctx.me)
+  const prompt = clearText(ctx.message?.caption, ctx.me)
   const photos = ctx.message?.photo;
 
   if (photos && prompt) {
@@ -13,7 +20,7 @@ const getImageToProcess = (ctx) => {
   }
 
   const replyPhotos = ctx.message?.reply_to_message?.photo;
-  const replyPrompt = clearText(ctx.message?.text?.trim(), ctx.me)
+  const replyPrompt = clearText(ctx.message?.text, ctx.me)
 
   if (replyPhotos && replyPrompt) {
     return { photos: replyPhotos, prompt: replyPrompt };
@@ -31,21 +38,20 @@ const getLargestPhotoUrl = async (ctx, photos) => {
 };
 
 const handleAIImageMessage = async (ctx) => {
+  const isImgCommand = getIsImgCommand(ctx);
   const imgObject = getImageToProcess(ctx);
 
-  if (!imgObject) {
-    console.log('No image to process or no prompt provided.');
+  if (!isImgCommand || !imgObject) {
+    console.log('No image to process or no command provided.');
     return;
   }
 
   try {
-    console.log('Processing image request...');
-
-    const fileUrl = await getLargestPhotoUrl(ctx, imgObject.photos);
-
     await ctx.sendChatAction('typing');
 
+    const fileUrl = await getLargestPhotoUrl(ctx, imgObject.photos);
     const aiResponse = await generateAIImageResponse(fileUrl, imgObject.prompt);
+
     await ctx.reply(`${aiResponse}`, { reply_to_message_id: ctx.message.message_id });
   } catch (err) {
     console.error('Error processing image request:', err);
