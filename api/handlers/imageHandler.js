@@ -4,19 +4,25 @@
 const { generateAIImageResponse } = require('../services/aiService');
 const { clearText } = require('../utils/text');
 
-const getShouldProcessImage = (ctx) => {
-  const caption = ctx.message?.caption?.trim()
-  const photo = ctx.message?.photo;
+const getImageToProcess = (ctx) => {
+  const prompt = clearText(ctx.message?.caption?.trim(), ctx.me)
+  const photos = ctx.message?.photo;
 
-  if (photo && caption) {
-    return caption.includes(`@${ctx.me}`) || caption.startsWith('/ai') || caption.startsWith(`/ai@${ctx.me}`);
+  if (photos && prompt) {
+    return { photos, prompt };
   }
 
-  return false
+  const replyPhotos = ctx.message?.reply_to_message?.photo;
+  const replyPrompt = clearText(ctx.message?.text?.trim(), ctx.me)
+
+  if (replyPhotos && replyPrompt) {
+    return { photos: replyPhotos, prompt: replyPrompt };
+  }
+
+  return null
 };
 
-const getLargestPhotoUrl = async (ctx) => {
-  const photos = ctx.message.photo;
+const getLargestPhotoUrl = async (ctx, photos) => {
   const largestPhoto = photos[photos.length - 1];
   const photoId = largestPhoto.file_id;
 
@@ -25,19 +31,21 @@ const getLargestPhotoUrl = async (ctx) => {
 };
 
 const handleAIImageMessage = async (ctx) => {
-  if (!getShouldProcessImage(ctx)) {
+  const imgObject = getImageToProcess(ctx);
+
+  if (!imgObject) {
+    console.log('No image to process or no prompt provided.');
     return;
   }
 
   try {
     console.log('Processing image request...');
 
-    const fileUrl = await getLargestPhotoUrl(ctx);
-    const clearedCaption = clearText(ctx.message.caption.trim(), ctx.me) || 'No caption provided';
+    const fileUrl = await getLargestPhotoUrl(ctx, imgObject.photos);
 
     await ctx.sendChatAction('typing');
 
-    const aiResponse = await generateAIImageResponse(fileUrl, clearedCaption);
+    const aiResponse = await generateAIImageResponse(fileUrl, imgObject.prompt);
     await ctx.reply(`${aiResponse}`, { reply_to_message_id: ctx.message.message_id });
   } catch (err) {
     console.error('Error processing image request:', err);

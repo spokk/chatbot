@@ -6,10 +6,10 @@ const { downloadImageAsBuffer } = require('../utils/http');
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 const MAX_TIME_TO_GENERATE = 50000; // 50 seconds
-const MAX_OUTPUT_TOKENS_CHAT = 800; // For Chat Responses: Use 500–900 tokens to keep responses concise and relevant.
-const MAX_OUTPUT_TOKENS_SUMMARY = 450; // For Summaries: Use 300–500 tokens to ensure the summary is short and to the point.
+const MAX_OUTPUT_TOKENS_CHAT = 500; // For Chat Responses: Use 500–900 tokens to keep responses concise and relevant.
+const MAX_OUTPUT_TOKENS_SUMMARY = 400; // For Summaries: Use 300–500 tokens to ensure the summary is short and to the point.
 
-const baseInstructions = 'Prioritize short and concise answer. Do not use special characters.';
+const baseInstructions = 'Prefer concise answer. Do not use special characters.';
 
 // Helper function to handle timeouts
 const withTimeout = async (promise, timeoutMs) => {
@@ -52,6 +52,7 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
     config: {
       safetySettings: safetySettings,
       systemInstruction,
+      temperature: 0.7,
       maxOutputTokens,
     },
   });

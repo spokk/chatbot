@@ -1,64 +1,18 @@
-const { getMessagesFromDb } = require('../services/dbService');
-const { generateAIResponse, generateAISummary } = require('../services/aiService');
+const { generateAIResponse } = require('../services/aiService');
 const { clearText } = require('../utils/text');
-const { decryptText } = require('../utils/crypto');
 
-// Main function to handle AI messages
 const handleAIMessage = async (ctx) => {
-  const { text, chat, message_id: messageId } = ctx.message;
-  const chatId = chat.id;
+  const prompt = clearText(ctx.message?.text, ctx.me);
 
-  if (shouldGenerateSummary(text, ctx.me)) {
-    await processSummaryRequest(ctx, chatId, messageId);
-    return;
-  }
-
-  if (!shouldProcessMessage(text, ctx)) return;
-
-  const prompt = clearText(text, ctx.me);
   if (!prompt) return;
 
-  await processAIRequest(ctx, prompt, messageId);
-};
-
-// Helper function to process summary requests
-const processSummaryRequest = async (ctx, chatId, messageId) => {
-  try {
-    await ctx.sendChatAction('typing');
-    const messages = await getMessagesFromDb(chatId, 50);
-
-    const decryptedMessages = messages.map((message) => ({
-      ...message,
-      message: decryptText(message.message),
-    }));
-
-    if (!decryptedMessages || decryptedMessages.length === 0) {
-      await ctx.reply('⚠️ No messages found to summarize.');
-      return;
-    }
-
-    const summary = await generateAISummary(JSON.stringify(decryptedMessages, null, 2));
-    if (!summary) {
-      await ctx.reply('⚠️ AI returned no summary.', { reply_to_message_id: messageId });
-      return;
-    }
-
-    await ctx.reply(summary, { reply_to_message_id: messageId });
-  } catch (err) {
-    console.error('Summary request error:', err);
-    await ctx.reply('⚠️ Error while processing summary request');
-  }
-};
-
-// Helper function to process AI requests
-const processAIRequest = async (ctx, prompt, messageId) => {
   try {
     await ctx.sendChatAction('typing');
     const aiContext = buildAIContext(ctx, prompt);
     const response = await generateAIResponse(aiContext);
     console.log('AI response:', response);
 
-    await sendResponseInChunks(ctx, response, messageId);
+    await sendResponseInChunks(ctx, response, ctx.message.message_id);
   } catch (err) {
     console.error('AI request error:', err);
     await ctx.reply('⚠️ Error while communicating with AI');
@@ -66,7 +20,7 @@ const processAIRequest = async (ctx, prompt, messageId) => {
 };
 
 // Helper function to send the response in chunks
-const sendResponseInChunks = async (ctx, response, messageId) => {
+const sendResponseInChunks = async (ctx, response) => {
   const chunkSize = 4000;
 
   for (let i = 0; i < response.length; i += chunkSize) {
@@ -74,7 +28,7 @@ const sendResponseInChunks = async (ctx, response, messageId) => {
 
     try {
       if (i === 0) {
-        await ctx.reply(chunk, { reply_to_message_id: messageId });
+        await ctx.reply(chunk, { reply_to_message_id: ctx.message.message_id });
       } else {
         await ctx.reply(chunk);
       }
@@ -85,28 +39,13 @@ const sendResponseInChunks = async (ctx, response, messageId) => {
   }
 };
 
-// Helper function to check if the message should be processed
-const shouldProcessMessage = (text, ctx) => {
-  return text.includes(`@${ctx.me}`) ||
-    text.startsWith('/ai') ||
-    text.startsWith(`/ai@${ctx.me}`) ||
-    ctx.message?.reply_to_message?.text?.trim() === "/ai" ||
-    ctx.message?.reply_to_message?.text?.trim() === `/ai@${ctx.me}`;
-
-};
-
-// Helper function to check if a summary should be generated
-const shouldGenerateSummary = (text, botUsername) => {
-  return text?.trim() === '/sum' || text?.trim() === `/sum@${botUsername}`;
-};
-
 // Helper function to build AI context
 const buildAIContext = (ctx, prompt) => {
   const isReply = ctx.message?.reply_to_message;
   const repliedMessage = clearText(ctx.message?.reply_to_message?.text, ctx.me);
 
   if (isReply && repliedMessage) {
-    return `Text to process: "${repliedMessage}". Request: "${prompt}".`;
+    return `Context: "${repliedMessage}". Request: "${prompt}".`;
   }
 
   return prompt;

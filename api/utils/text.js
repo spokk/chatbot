@@ -4,8 +4,10 @@ const clearText = (text, botUsername = process.env.BOT_USERNAME) => {
   return text
     .replace(`/ai@${botUsername}`, '')
     .replace(`/sum@${botUsername}`, '')
+    .replace(`/img@${botUsername}`, '')
     .replace(`/ai`, '')
     .replace(`/sum`, '')
+    .replace(`/img`, '')
     .trim();
 };
 
