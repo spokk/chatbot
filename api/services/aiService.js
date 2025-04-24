@@ -2,7 +2,6 @@ const { GoogleGenAI, Modality } = require('@google/genai');
 
 const { log } = require('../utils/logger');
 const { downloadImageAsBuffer } = require('../utils/http');
-const { clearText } = require('../utils/text');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
@@ -63,12 +62,12 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
   return response?.text;
 };
 
-const generateAIImage = async (ctx) => {
-  log(ctx.message?.text, 'AI image generation input:');
+const generateAIImage = async (contents) => {
+  log(contents, 'AI image generation input:');
 
   const aiRequest = ai.models.generateContent({
     model: 'gemini-2.0-flash-exp-image-generation',
-    contents: clearText(ctx.message?.text) || "No request provided",
+    contents,
     config: {
       numberOfImages: 1,
       responseModalities: [Modality.TEXT, Modality.IMAGE],
@@ -114,4 +113,26 @@ const generateAIImageResponse = async (imageURL, caption) => {
   return generateAIContent(contents, baseInstructions, MAX_OUTPUT_TOKENS_CHAT);
 };
 
-module.exports = { generateAIResponse, generateAISummary, generateAIImageResponse, generateAIImage };
+// Function to generate AI image response
+const generateAIImageEditResponse = async (imageURL, caption) => {
+  // Step 1: Download the image as a buffer
+  const imageBuffer = await downloadImageAsBuffer(imageURL);
+
+  // Step 2: Convert the buffer to a base64
+  const base64ImageData = Buffer.from(imageBuffer).toString('base64');
+
+  // Step 3: Prepare and generate AI content
+  const contents = [
+    {
+      inlineData: {
+        mimeType: 'image/jpeg',
+        data: base64ImageData,
+      },
+    },
+    { text: caption }
+  ];
+
+  return generateAIImage(contents, baseInstructions, MAX_OUTPUT_TOKENS_CHAT);
+};
+
+module.exports = { generateAIResponse, generateAISummary, generateAIImageResponse, generateAIImage, generateAIImageEditResponse };

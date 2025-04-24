@@ -1,17 +1,23 @@
-const { generateAIImage } = require('../services/aiService');
+const { generateAIImageEditResponse } = require('../services/aiService');
+const { getImageToProcess, getLargestPhotoUrl } = require('../utils/image');
 
 const { log } = require('../utils/logger');
-const { clearText } = require('../utils/text');
 
-const handleAIImageGen = async (ctx) => {
-  log(ctx.message.text, 'Received image generation request:');
+const handleAIImageEdit = async (ctx) => {
+  log(ctx.message.text, 'Received image edit request:');
+
+  const imgObject = getImageToProcess(ctx);
+
+  if (!imgObject) {
+    console.error('No image to process.');
+    return;
+  }
 
   try {
     await ctx.sendChatAction('typing');
 
-    const contents = clearText(ctx.message?.text) || "No request provided"
-
-    const response = await generateAIImage(contents)
+    const fileUrl = await getLargestPhotoUrl(ctx, imgObject.photos);
+    const response = await generateAIImageEditResponse(fileUrl, imgObject.prompt);
 
     if (!response.candidates[0]?.content?.parts[0]?.inlineData) {
       console.error('AI generated no image:', { content: response.candidates[0]?.content });
@@ -33,4 +39,4 @@ const handleAIImageGen = async (ctx) => {
   }
 }
 
-module.exports = { handleAIImageGen };
+module.exports = { handleAIImageEdit };

@@ -1,7 +1,3 @@
-
-
-
-const { generateAIImageResponse } = require('../services/aiService');
 const { clearText } = require('../utils/text');
 
 const getIsImgCommand = (ctx) => {
@@ -9,6 +5,13 @@ const getIsImgCommand = (ctx) => {
   const text = ctx.message?.caption || ctx.message?.text || '';
 
   return text.startsWith(imgCmd) || text.startsWith(`${imgCmd}@${ctx.me}`);
+}
+
+const getIsEditCommand = (ctx) => {
+  const editCmd = `/edit`;
+  const text = ctx.message?.caption || ctx.message?.text || '';
+
+  return text.startsWith(editCmd) || text.startsWith(`${editCmd}@${ctx.me}`);
 }
 
 const getImageToProcess = (ctx) => {
@@ -37,26 +40,9 @@ const getLargestPhotoUrl = async (ctx, photos) => {
   return `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
 };
 
-const handleAIImageMessage = async (ctx) => {
-  const isImgCommand = getIsImgCommand(ctx);
-  const imgObject = getImageToProcess(ctx);
-
-  if (!isImgCommand || !imgObject) {
-    console.log('No image to process or no command provided.');
-    return;
-  }
-
-  try {
-    await ctx.sendChatAction('typing');
-
-    const fileUrl = await getLargestPhotoUrl(ctx, imgObject.photos);
-    const aiResponse = await generateAIImageResponse(fileUrl, imgObject.prompt);
-
-    await ctx.reply(`${aiResponse}`, { reply_to_message_id: ctx.message.message_id });
-  } catch (err) {
-    console.error('Error processing image request:', err);
-    await ctx.reply('⚠️ Error while processing the image request.');
-  }
+module.exports = {
+  getIsImgCommand,
+  getIsEditCommand,
+  getImageToProcess,
+  getLargestPhotoUrl
 };
-
-module.exports = { handleAIImageMessage };

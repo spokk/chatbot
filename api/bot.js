@@ -5,10 +5,12 @@ const { message } = require('telegraf/filters');
 
 const { connectToDb } = require('./services/dbService');
 const { handleAIMessage } = require('./handlers/aiHandler');
-const { handleAIImageMessage } = require('./handlers/imageHandler');
+const { handleAIImageRecognition } = require('./handlers/imageRecognitionHandler');
 const { handleAISummary } = require('./handlers/summaryHandler');
 const { insertMessageToDb } = require('./handlers/dbHandler');
 const { handleAIImageGen } = require('./handlers/imageGenHandler');
+const { handleAIImageEdit } = require('./handlers/imageEditHandler');
+const { imageHandlerRouter } = require('./handlers/imageHandlerRouter');
 
 const { log } = require('./utils/logger');
 
@@ -19,17 +21,17 @@ module.exports = async (req, res) => {
 
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
-  // Reply
-  bot.command('img', async (ctx) => { await handleAIImageMessage(ctx) })
-
-  // Img with caption
-  bot.on(message('photo'), async (ctx) => { await handleAIImageMessage(ctx) });
+  bot.command('img', async (ctx) => { await handleAIImageRecognition(ctx) })
 
   bot.command('ai', async (ctx) => { await handleAIMessage(ctx) })
 
   bot.command('sum', async (ctx) => { await handleAISummary(ctx) })
 
   bot.command('gen', async (ctx) => { await handleAIImageGen(ctx) })
+
+  bot.command('edit', async (ctx) => { await handleAIImageEdit(ctx) })
+
+  bot.on(message('photo'), async (ctx) => { await imageHandlerRouter(ctx) });
 
 
   // Connect to MongoDB
