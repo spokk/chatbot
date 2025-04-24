@@ -8,6 +8,8 @@ const { handleAIMessage } = require('./handlers/aiHandler');
 const { handleAIImageMessage } = require('./handlers/imageHandler');
 const { handleAISummary } = require('./handlers/summaryHandler');
 const { insertMessageToDb } = require('./handlers/dbHandler');
+const { handleAIImageGen } = require('./handlers/imageGenHandler');
+
 const { log } = require('./utils/logger');
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
@@ -26,6 +28,9 @@ module.exports = async (req, res) => {
   bot.command('ai', async (ctx) => { await handleAIMessage(ctx) })
 
   bot.command('sum', async (ctx) => { await handleAISummary(ctx) })
+
+  bot.command('gen', async (ctx) => { await handleAIImageGen(ctx) })
+
 
   // Connect to MongoDB
   const dbClient = await connectToDb();

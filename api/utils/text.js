@@ -5,9 +5,11 @@ const clearText = (text, botUsername = process.env.BOT_USERNAME) => {
     .replace(`/ai@${botUsername}`, '')
     .replace(`/sum@${botUsername}`, '')
     .replace(`/img@${botUsername}`, '')
+    .replace(`/gen@${botUsername}`, '')
     .replace(`/ai`, '')
     .replace(`/sum`, '')
     .replace(`/img`, '')
+    .replace(`/gen`, '')
     .trim();
 };
 

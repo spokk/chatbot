@@ -1,7 +1,8 @@
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenAI, Modality } = require('@google/genai');
 
 const { log } = require('../utils/logger');
 const { downloadImageAsBuffer } = require('../utils/http');
+const { clearText } = require('../utils/text');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
@@ -10,14 +11,6 @@ const MAX_OUTPUT_TOKENS_CHAT = 500; // For Chat Responses: Use 500–900 tokens 
 const MAX_OUTPUT_TOKENS_SUMMARY = 400; // For Summaries: Use 300–500 tokens to ensure the summary is short and to the point.
 
 const baseInstructions = 'Prefer concise answer. Do not use special characters.';
-
-// Helper function to handle timeouts
-const withTimeout = async (promise, timeoutMs) => {
-  const timeout = new Promise((resolve) =>
-    setTimeout(() => resolve({ text: '⚠️ AI is taking too long to respond.' }), timeoutMs)
-  );
-  return Promise.race([promise, timeout]);
-};
 
 const safetySettings = [
   {
@@ -42,6 +35,14 @@ const safetySettings = [
   },
 ];
 
+// Helper function to handle timeouts
+const withTimeout = async (promise, timeoutMs) => {
+  const timeout = new Promise((resolve) =>
+    setTimeout(() => resolve({ text: '⚠️ AI is taking too long to respond.' }), timeoutMs)
+  );
+  return Promise.race([promise, timeout]);
+};
+
 // Helper function to generate AI content
 const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
   log(contents, 'AI content generation input:');
@@ -59,12 +60,25 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
 
   const response = await withTimeout(aiRequest, MAX_TIME_TO_GENERATE);
 
-  if (!response?.text) throw new Error("⚠️ AI returned nothing.");
-
-  log(response.text, 'AI content generation response:');
-
-  return response.text;
+  return response?.text;
 };
+
+const generateAIImage = async (ctx) => {
+  log(ctx.message?.text, 'AI image generation input:');
+
+  const aiRequest = ai.models.generateContent({
+    model: 'gemini-2.0-flash-exp-image-generation',
+    contents: clearText(ctx.message?.text) || "No request provided",
+    config: {
+      numberOfImages: 1,
+      responseModalities: [Modality.TEXT, Modality.IMAGE],
+    },
+  });
+
+  const response = await withTimeout(aiRequest, MAX_TIME_TO_GENERATE);
+
+  return response;
+}
 
 // Function to generate AI response
 const generateAIResponse = async (contents) => {
@@ -80,29 +94,24 @@ const generateAISummary = async (contents) => {
 
 // Function to generate AI image response
 const generateAIImageResponse = async (imageURL, caption) => {
-  try {
-    // Step 1: Download the image as a buffer
-    const imageBuffer = await downloadImageAsBuffer(imageURL);
+  // Step 1: Download the image as a buffer
+  const imageBuffer = await downloadImageAsBuffer(imageURL);
 
-    // Step 2: Convert the buffer to a base64
-    const base64ImageData = Buffer.from(imageBuffer).toString('base64');
+  // Step 2: Convert the buffer to a base64
+  const base64ImageData = Buffer.from(imageBuffer).toString('base64');
 
-    // Step 3: Prepare and generate AI content
-    const contents = [
-      {
-        inlineData: {
-          mimeType: 'image/jpeg',
-          data: base64ImageData,
-        },
+  // Step 3: Prepare and generate AI content
+  const contents = [
+    {
+      inlineData: {
+        mimeType: 'image/jpeg',
+        data: base64ImageData,
       },
-      { text: caption }
-    ];
+    },
+    { text: caption }
+  ];
 
-    return generateAIContent(contents, baseInstructions, MAX_OUTPUT_TOKENS_CHAT);
-  } catch (error) {
-    console.error('Error processing image request:', error);
-    throw error;
-  }
+  return generateAIContent(contents, baseInstructions, MAX_OUTPUT_TOKENS_CHAT);
 };
 
-module.exports = { generateAIResponse, generateAISummary, generateAIImageResponse };
+module.exports = { generateAIResponse, generateAISummary, generateAIImageResponse, generateAIImage };
