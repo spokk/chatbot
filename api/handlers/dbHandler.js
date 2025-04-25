@@ -30,10 +30,6 @@ const extractMessageData = (body) => {
 
   if (!message || !message.chat?.id || !message.text) return null;
 
-  const isCommand = message.text.startsWith('/sum');
-
-  if (isCommand) return null;
-
   const userName = message.from?.first_name || message.from?.username;
 
   return {

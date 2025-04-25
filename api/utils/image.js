@@ -29,6 +29,12 @@ const getImageToProcess = (ctx) => {
     return { photos: replyPhotos, prompt: replyPrompt };
   }
 
+  const replySticker = ctx.message?.reply_to_message?.sticker?.thumbnail;
+
+  if (replySticker && replyPrompt) {
+    return { photos: [replySticker], prompt: replyPrompt };
+  }
+
   return null
 };
 

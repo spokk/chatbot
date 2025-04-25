@@ -26,7 +26,7 @@ const connectToDb = async () => {
   return client;
 };
 
-const getMessagesFromDb = async (chatId, limit) => {
+const getMessagesFromDb = async (chatId, limit = 50) => {
   if (!client) throw new Error('MongoDB client is not connected');
 
   const db = client.db('tg_db');
