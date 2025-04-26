@@ -1,5 +1,7 @@
 const { MongoClient } = require('mongodb');
 
+const { encryptText, decryptText } = require('../utils/crypto');
+
 let client;
 
 const connectToDb = async () => {
@@ -55,4 +57,62 @@ const getMessagesFromDb = async (chatId, limit = 50) => {
   }
 }
 
-module.exports = { connectToDb, getMessagesFromDb };
+const insertAIResponseToDb = async (ctx, response) => {
+  if (!response) return;
+
+  if (!client) throw new Error('MongoDB client is not connected');
+
+  const db = client.db('tg_db');
+  const collection = db.collection('messages');
+
+  const encryptedText = encryptText(response);
+
+  await collection.insertOne({
+    chatId: ctx.message.chat.id,
+    message: encryptedText,
+    userName: "AI_Chat_bot",
+    createdAt: new Date(),
+  });
+}
+
+const buildAIHistory = async (ctx) => {
+  const messages = await getMessagesFromDb(ctx.message.chat.id, 50);
+
+  // Decrypt messages and categorize them into user and model roles
+  const { user, model } = messages.reduce(
+    (acc, message) => {
+      const decryptedMessage = {
+        userName: message.userName,
+        message: decryptText(message.message),
+      };
+
+      if (decryptedMessage.userName === "AI_Chat_bot") {
+        acc.model.push({ text: decryptedMessage.message });
+      } else {
+        acc.user.push({ text: decryptedMessage.message });
+      }
+
+      return acc;
+    },
+    { user: [], model: [] } // Initial accumulator
+  );
+
+  // Return an empty array if no messages exist
+  if (user.length === 0 && model.length === 0) {
+    return [];
+  }
+
+  // Build and return the history
+  return [
+    {
+      role: 'user',
+      parts: user,
+    },
+    {
+      role: 'model',
+      parts: model.length === 0 ? [{ text: "Good to know." }] : model,
+    },
+  ];
+};
+
+module.exports = { connectToDb, getMessagesFromDb, insertAIResponseToDb, buildAIHistory };

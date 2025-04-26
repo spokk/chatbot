@@ -1,4 +1,6 @@
 const { generateAIResponse } = require('../services/aiService');
+const { insertAIResponseToDb, buildAIHistory } = require('../services/dbService');
+
 const { clearText } = require('../utils/text');
 
 const handleAIMessage = async (ctx) => {
@@ -8,11 +10,13 @@ const handleAIMessage = async (ctx) => {
 
   try {
     await ctx.sendChatAction('typing');
-    const aiContext = buildAIContext(ctx, prompt);
-    const response = await generateAIResponse(aiContext);
-    console.log('AI response:', response);
+    const history = await buildAIHistory(ctx);
+    const response = await generateAIResponse(prompt, history);
 
-    await sendResponseInChunks(ctx, response, ctx.message.message_id);
+    await Promise.all([
+      sendResponseInChunks(ctx, response),
+      insertAIResponseToDb(ctx, response)
+    ]);
   } catch (err) {
     console.error('AI request error:', err);
     await ctx.reply('⚠️ Error while communicating with AI');
@@ -39,16 +43,5 @@ const sendResponseInChunks = async (ctx, response) => {
   }
 };
 
-// Helper function to build AI context
-const buildAIContext = (ctx, prompt) => {
-  const isReply = ctx.message?.reply_to_message;
-  const repliedMessage = clearText(ctx.message?.reply_to_message?.text, ctx.me);
-
-  if (isReply && repliedMessage) {
-    return `Context: "${repliedMessage}". Request: "${prompt}".`;
-  }
-
-  return prompt;
-};
 
 module.exports = { handleAIMessage };

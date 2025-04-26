@@ -1,37 +1,23 @@
 const { GoogleGenAI, Modality } = require('@google/genai');
 
-const { log } = require('../utils/logger');
 const { downloadImageAsBuffer } = require('../utils/http');
+const { log } = require('../utils/logger');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
+// Constants
 const MAX_TIME_TO_GENERATE = 50000; // 50 seconds
-const MAX_OUTPUT_TOKENS_CHAT = 500; // For Chat Responses: Use 500–900 tokens to keep responses concise and relevant.
-const MAX_OUTPUT_TOKENS_SUMMARY = 400; // For Summaries: Use 300–500 tokens to ensure the summary is short and to the point.
-
-const baseInstructions = 'Prefer concise answer. Do not use special characters.';
-
-const safetySettings = [
-  {
-    category: "HARM_CATEGORY_HARASSMENT",
-    threshold: "BLOCK_ONLY_HIGH",
-  },
-  {
-    category: "HARM_CATEGORY_HATE_SPEECH",
-    threshold: "BLOCK_ONLY_HIGH",
-  },
-  {
-    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-    threshold: "BLOCK_ONLY_HIGH",
-  },
-  {
-    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-    threshold: "BLOCK_ONLY_HIGH",
-  },
-  {
-    category: "HARM_CATEGORY_CIVIC_INTEGRITY",
-    threshold: "BLOCK_ONLY_HIGH",
-  },
+const MAX_OUTPUT_TOKENS = {
+  CHAT: 500,
+  SUMMARY: 400,
+};
+const BASE_INSTRUCTIONS = 'Prefer concise answer. Do not use special characters.';
+const SAFETY_SETTINGS = [
+  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+  { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_ONLY_HIGH" },
 ];
 
 // Helper function to handle timeouts
@@ -42,97 +28,99 @@ const withTimeout = async (promise, timeoutMs) => {
   return Promise.race([promise, timeout]);
 };
 
-// Helper function to generate AI content
+// Helper function to create AI request
+const createAIRequest = (model, contents, config) => {
+  return ai.models.generateContent({
+    model,
+    contents,
+    config,
+  });
+};
+
+// Helper function to handle AI response
+const handleAIResponse = async (aiRequest, timeout) => {
+  const response = await withTimeout(aiRequest, timeout);
+  return response?.text || null;
+};
+
+// Function to generate AI content
 const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
   log(contents, 'AI content generation input:');
-
-  const aiRequest = ai.models.generateContent({
-    model: "gemini-2.0-flash",
+  const aiRequest = createAIRequest("gemini-2.0-flash",
     contents,
+    {
+      safetySettings: SAFETY_SETTINGS,
+      systemInstruction,
+      temperature: 0.7,
+      maxOutputTokens,
+    });
+  return handleAIResponse(aiRequest, MAX_TIME_TO_GENERATE);
+};
+
+// Function to generate AI chat
+const generateAIChat = async (contents, history, systemInstruction, maxOutputTokens) => {
+  log(contents, 'AI chat generation input:');
+  const chat = ai.chats.create({
+    model: "gemini-2.0-flash",
+    history,
     config: {
-      safetySettings: safetySettings,
+      safetySettings: SAFETY_SETTINGS,
       systemInstruction,
       temperature: 0.7,
       maxOutputTokens,
     },
   });
-
-  const response = await withTimeout(aiRequest, MAX_TIME_TO_GENERATE);
-
-  return response?.text;
+  const aiRequest = async (prompt) => chat.sendMessage({ message: prompt });
+  return handleAIResponse(aiRequest(contents), MAX_TIME_TO_GENERATE);
 };
 
+// Function to generate AI image
 const generateAIImage = async (contents) => {
   log(contents, 'AI image generation input:');
-
-  const aiRequest = ai.models.generateContent({
-    model: 'gemini-2.0-flash-exp-image-generation',
-    contents,
-    config: {
-      numberOfImages: 1,
-      responseModalities: [Modality.TEXT, Modality.IMAGE],
-    },
+  const aiRequest = createAIRequest("gemini-2.0-flash-exp-image-generation", contents, {
+    numberOfImages: 1,
+    responseModalities: [Modality.TEXT, Modality.IMAGE],
   });
-
-  const response = await withTimeout(aiRequest, MAX_TIME_TO_GENERATE);
-
-  return response;
-}
-
-// Function to generate AI response
-const generateAIResponse = async (contents) => {
-  return generateAIContent(contents, baseInstructions, MAX_OUTPUT_TOKENS_CHAT);
+  return withTimeout(aiRequest, MAX_TIME_TO_GENERATE);
 };
 
-// Function to generate AI summary
-const generateAISummary = async (contents) => {
-  const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation. Prefer answer in Ukrainian. ${baseInstructions}`;
-
-  return generateAIContent(contents, systemInstruction, MAX_OUTPUT_TOKENS_SUMMARY);
+// Helper function to prepare AI image content
+const prepareAIImageContent = async (imageURL, caption) => {
+  const imageBuffer = await downloadImageAsBuffer(imageURL);
+  const base64ImageData = Buffer.from(imageBuffer).toString('base64');
+  return [
+    { inlineData: { mimeType: 'image/jpeg', data: base64ImageData } },
+    { text: caption },
+  ];
 };
 
 // Function to generate AI image response
 const generateAIImageResponse = async (imageURL, caption) => {
-  // Step 1: Download the image as a buffer
-  const imageBuffer = await downloadImageAsBuffer(imageURL);
-
-  // Step 2: Convert the buffer to a base64
-  const base64ImageData = Buffer.from(imageBuffer).toString('base64');
-
-  // Step 3: Prepare and generate AI content
-  const contents = [
-    {
-      inlineData: {
-        mimeType: 'image/jpeg',
-        data: base64ImageData,
-      },
-    },
-    { text: caption }
-  ];
-
-  return generateAIContent(contents, baseInstructions, MAX_OUTPUT_TOKENS_CHAT);
+  const contents = await prepareAIImageContent(imageURL, caption);
+  return generateAIContent(contents, BASE_INSTRUCTIONS, MAX_OUTPUT_TOKENS.CHAT);
 };
 
-// Function to generate AI image response
+// Function to generate AI image edit response
 const generateAIImageEditResponse = async (imageURL, caption) => {
-  // Step 1: Download the image as a buffer
-  const imageBuffer = await downloadImageAsBuffer(imageURL);
-
-  // Step 2: Convert the buffer to a base64
-  const base64ImageData = Buffer.from(imageBuffer).toString('base64');
-
-  // Step 3: Prepare and generate AI content
-  const contents = [
-    {
-      inlineData: {
-        mimeType: 'image/jpeg',
-        data: base64ImageData,
-      },
-    },
-    { text: caption }
-  ];
-
-  return generateAIImage(contents, baseInstructions, MAX_OUTPUT_TOKENS_CHAT);
+  const contents = await prepareAIImageContent(imageURL, caption);
+  return generateAIImage(contents);
 };
 
-module.exports = { generateAIResponse, generateAISummary, generateAIImageResponse, generateAIImage, generateAIImageEditResponse };
+// Function to generate AI response
+const generateAIResponse = async (contents, history = []) => {
+  return generateAIChat(contents, history, BASE_INSTRUCTIONS, MAX_OUTPUT_TOKENS.CHAT);
+};
+
+// Function to generate AI summary
+const generateAISummary = async (contents) => {
+  const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation. Prefer answer in Ukrainian. ${BASE_INSTRUCTIONS}`;
+  return generateAIContent(contents, systemInstruction, MAX_OUTPUT_TOKENS.SUMMARY);
+};
+
+module.exports = {
+  generateAIResponse,
+  generateAISummary,
+  generateAIImageResponse,
+  generateAIImage,
+  generateAIImageEditResponse,
+};
