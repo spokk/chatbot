@@ -3,10 +3,12 @@ const { getImageToProcess, getLargestPhotoUrl } = require('../utils/image');
 
 
 const handleAIImageRecognition = async (ctx) => {
+  log(ctx.message?.text || ctx.message?.caption, 'Received image recognition request:');
+
   const imgObject = getImageToProcess(ctx);
 
   if (!imgObject) {
-    console.log('No image to process.');
+    console.error('No image to process.');
     return;
   }
 

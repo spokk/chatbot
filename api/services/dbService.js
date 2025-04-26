@@ -1,6 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 const { encryptText, decryptText } = require('../utils/crypto');
+const { clearText } = require('../utils/text');
 
 let client;
 
@@ -75,6 +76,43 @@ const insertAIResponseToDb = async (ctx, response) => {
   });
 }
 
+const insertMessageToDb = async (body, collection) => {
+  const messageData = extractMessageData(body);
+
+  if (!messageData) return;
+
+  const { chatId, text, userName } = messageData;
+
+  const clearedText = clearText(text)
+
+  if (!clearedText) return;
+
+  // Encrypt the message text before inserting
+  const encryptedText = encryptText(clearedText);
+
+  await collection.insertOne({
+    chatId,
+    message: encryptedText,
+    userName,
+    createdAt: new Date(),
+  });
+};
+
+// Helper function to extract message data
+const extractMessageData = (body) => {
+  const message = body?.message || body?.edited_message;
+
+  if (!message || !message.chat?.id || !message.text) return null;
+
+  const userName = message.from?.first_name || message.from?.username;
+
+  return {
+    chatId: message.chat.id,
+    text: message.text,
+    userName,
+  };
+};
+
 const buildAIHistory = async (ctx) => {
   const messages = await getMessagesFromDb(ctx.message.chat.id, 30);
 
@@ -115,4 +153,4 @@ const buildAIHistory = async (ctx) => {
   ];
 };
 
-module.exports = { connectToDb, getMessagesFromDb, insertAIResponseToDb, buildAIHistory };
+module.exports = { connectToDb, getMessagesFromDb, insertAIResponseToDb, buildAIHistory, insertMessageToDb };

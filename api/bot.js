@@ -3,11 +3,11 @@ require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const { message } = require('telegraf/filters');
 
-const { connectToDb } = require('./services/dbService');
+const { connectToDb, insertMessageToDb } = require('./services/dbService');
+
 const { handleAIMessage } = require('./handlers/aiHandler');
 const { handleAIImageRecognition } = require('./handlers/imageRecognitionHandler');
 const { handleAISummary } = require('./handlers/summaryHandler');
-const { insertMessageToDb } = require('./handlers/dbHandler');
 const { handleAIImageGen } = require('./handlers/imageGenHandler');
 const { handleAIImageEdit } = require('./handlers/imageEditHandler');
 const { imageHandlerRouter } = require('./handlers/imageHandlerRouter');

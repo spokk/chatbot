@@ -1,32 +1,20 @@
 const { generateAIImage } = require('../services/aiService');
 
-const { log } = require('../utils/logger');
+const { processAIImageResponse } = require('../utils/image');
 const { clearText } = require('../utils/text');
+const { log } = require('../utils/logger');
 
 const handleAIImageGen = async (ctx) => {
-  log(ctx.message.text, 'Received image generation request:');
+  log(ctx.message?.text, 'Received image generation request:');
 
   try {
     await ctx.sendChatAction('typing');
 
-    const contents = clearText(ctx.message?.text) || "No request provided"
+    const contents = clearText(ctx.message?.text) || "No request provided."
 
     const response = await generateAIImage(contents)
 
-    if (!response.candidates[0]?.content?.parts[0]?.inlineData) {
-      console.error('AI generated no image:', { content: response.candidates[0]?.content });
-      await ctx.reply(`⚠️ ${response.candidates[0]?.content?.parts[0]?.text}` || '⚠️ AI generated nothing.');
-    }
-
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        const imageData = part.inlineData.data;
-        const buffer = Buffer.from(imageData, "base64");
-        const caption = { caption: `Here is your generated image, ${ctx.message.from?.first_name || ctx.message.from?.username}!` }
-
-        await ctx.replyWithPhoto({ source: buffer }, { ...caption });
-      }
-    }
+    await processAIImageResponse(ctx, response);
   } catch (error) {
     console.error('Error processing image request:', error);
     await ctx.reply('⚠️ Error while processing the image generation request.');
