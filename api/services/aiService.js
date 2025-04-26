@@ -8,8 +8,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 // Constants
 const MAX_TIME_TO_GENERATE = 50000; // 50 seconds
 const MAX_OUTPUT_TOKENS = {
-  CHAT: 500,
-  SUMMARY: 400,
+  SUMMARY: 600,
 };
 const BASE_INSTRUCTIONS = 'Prefer concise answer. Do not use special characters.';
 const SAFETY_SETTINGS = [
@@ -19,6 +18,7 @@ const SAFETY_SETTINGS = [
   { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
   { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_ONLY_HIGH" },
 ];
+const BASE_MODEL = "gemini-2.5-flash-preview-04-17"
 
 // Helper function to handle timeouts
 const withTimeout = async (promise, timeoutMs) => {
@@ -40,13 +40,14 @@ const createAIRequest = (model, contents, config) => {
 // Helper function to handle AI response
 const handleAIResponse = async (aiRequest, timeout) => {
   const response = await withTimeout(aiRequest, timeout);
+  log(response, 'AI chat generation response:');
   return response?.text || null;
 };
 
 // Function to generate AI content
 const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
   log(contents, 'AI content generation input:');
-  const aiRequest = createAIRequest("gemini-2.0-flash",
+  const aiRequest = createAIRequest(BASE_MODEL,
     contents,
     {
       safetySettings: SAFETY_SETTINGS,
@@ -61,13 +62,12 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
 const generateAIChat = async (contents, history, systemInstruction, maxOutputTokens) => {
   log(contents, 'AI chat generation input:');
   const chat = ai.chats.create({
-    model: "gemini-2.0-flash",
+    model: BASE_MODEL,
     history,
     config: {
       safetySettings: SAFETY_SETTINGS,
       systemInstruction,
       temperature: 0.7,
-      maxOutputTokens,
     },
   });
   const aiRequest = async (prompt) => chat.sendMessage({ message: prompt });
@@ -108,7 +108,7 @@ const generateAIImageEditResponse = async (imageURL, caption) => {
 
 // Function to generate AI response
 const generateAIResponse = async (contents, history = []) => {
-  return generateAIChat(contents, history, BASE_INSTRUCTIONS, MAX_OUTPUT_TOKENS.CHAT);
+  return generateAIChat(contents, history, BASE_INSTRUCTIONS);
 };
 
 // Function to generate AI summary

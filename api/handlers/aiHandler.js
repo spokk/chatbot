@@ -13,13 +13,18 @@ const handleAIMessage = async (ctx) => {
     const history = await buildAIHistory(ctx);
     const response = await generateAIResponse(prompt, history);
 
+    if (!response) {
+      await ctx.reply('⚠️ No response from AI. Try again...');
+      return;
+    }
+
     await Promise.all([
       sendResponseInChunks(ctx, response),
       insertAIResponseToDb(ctx, response)
     ]);
   } catch (err) {
     console.error('AI request error:', err);
-    await ctx.reply('⚠️ Error while communicating with AI');
+    await ctx.reply('⚠️ Error while communicating with AI. Try again...');
   }
 };
 

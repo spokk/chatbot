@@ -76,7 +76,7 @@ const insertAIResponseToDb = async (ctx, response) => {
 }
 
 const buildAIHistory = async (ctx) => {
-  const messages = await getMessagesFromDb(ctx.message.chat.id, 50);
+  const messages = await getMessagesFromDb(ctx.message.chat.id, 30);
 
   // Decrypt messages and categorize them into user and model roles
   const { user, model } = messages.reduce(
