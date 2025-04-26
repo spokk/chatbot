@@ -8,6 +8,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 // Constants
 const MAX_TIME_TO_GENERATE = 50000; // 50 seconds
 const MAX_OUTPUT_TOKENS = {
+  CHAT: 600,
   SUMMARY: 600,
 };
 const BASE_INSTRUCTIONS = 'Prefer concise answer. Do not use special characters.';
@@ -59,7 +60,7 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
 };
 
 // Function to generate AI chat
-const generateAIChat = async (contents, history, systemInstruction, maxOutputTokens) => {
+const generateAIChat = async (contents, history, systemInstruction) => {
   log(contents, 'AI chat generation input:');
   const chat = ai.chats.create({
     model: BASE_MODEL,
@@ -76,7 +77,7 @@ const generateAIChat = async (contents, history, systemInstruction, maxOutputTok
 
 // Function to generate AI image
 const generateAIImage = async (contents) => {
-  log(contents, 'AI image generation input:');
+  console.log('AI image generation input:', contents);
   const aiRequest = createAIRequest("gemini-2.0-flash-exp-image-generation", contents, {
     numberOfImages: 1,
     responseModalities: [Modality.TEXT, Modality.IMAGE],
