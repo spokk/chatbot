@@ -21,11 +21,11 @@ module.exports = async (req, res) => {
 
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
-  bot.command('img', async (ctx) => { await handleAIImageRecognition(ctx) })
-
   bot.command('ai', async (ctx) => { await handleAIMessage(ctx) })
 
   bot.command('sum', async (ctx) => { await handleAISummary(ctx) })
+
+  bot.command('img', async (ctx) => { await handleAIImageRecognition(ctx) })
 
   bot.command('gen', async (ctx) => { await handleAIImageGen(ctx) })
 

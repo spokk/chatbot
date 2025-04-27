@@ -13,11 +13,11 @@ const handleAISummary = async (ctx) => {
     }));
 
     if (!decryptedMessages || decryptedMessages.length === 0) {
-      await ctx.reply('⚠️ No messages found to summarize.');
+      await ctx.reply('⚠️ No recent messages found to summarize. Please send some messages first.');
       return;
     }
 
-    const summary = await generateAISummary(JSON.stringify(decryptedMessages, null, 2));
+    const summary = await generateAISummary(JSON.stringify(decryptedMessages));
     if (!summary) {
       await ctx.reply('⚠️ AI returned no summary.', { reply_to_message_id: ctx.message.message_id });
       return;

@@ -6,7 +6,10 @@ const { clearText } = require('../utils/text');
 const handleAIMessage = async (ctx) => {
   const prompt = clearText(ctx.message?.text, ctx.me);
 
-  if (!prompt) return;
+  if (!prompt) {
+    await ctx.reply('⚠️ No input provided. Please send a message for AI processing.');
+    return;
+  }
 
   try {
     await ctx.sendChatAction('typing');

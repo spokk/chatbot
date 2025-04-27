@@ -5,9 +5,12 @@ const { clearText } = require('../utils/text');
 
 let client;
 
+const DB_NAME = 'tg_db';
+const COLLECTION_NAME = 'messages';
+
 const connectToDb = async () => {
   if (client) {
-    console.log('Using existing MongoDB connection');
+    console.log('Using existing MongoDB connection.');
     return client;
   }
 
@@ -20,51 +23,42 @@ const connectToDb = async () => {
 
   try {
     await client.connect();
-    console.log('MongoDB connected successfully');
+    console.log('MongoDB connected successfully.');
   } catch (error) {
     console.error('MongoDB connection failed:', error);
-    throw new Error('Failed to connect to MongoDB');
+    throw new Error('Failed to connect to MongoDB.');
   }
 
   return client;
 };
 
 const getMessagesFromDb = async (chatId, limit = 50) => {
-  if (!client) throw new Error('MongoDB client is not connected');
+  if (!client) throw new Error('MongoDB client is not connected.');
 
-  const db = client.db('tg_db');
-  const collection = db.collection('messages');
+  const db = client.db(DB_NAME);
+  const collection = db.collection(COLLECTION_NAME);
 
   try {
-    // Get the start and end of the current day
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0); // Set time to 00:00:00.000
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999); // Set time to 23:59:59.999
-
     const messages = await collection
-      .find({
-        chatId,
-        createdAt: { $gte: startOfDay, $lt: endOfDay }, // Filter by current day
-      })
+      .find({ chatId })
       .sort({ _id: -1 })
       .limit(limit)
       .toArray();
 
     return messages;
   } catch (error) {
-    console.error('Error fetching messages from DB:', error);
-    throw new Error('Failed to fetch messages from DB');
+    console.error(`Error fetching messages for chatId ${chatId}:`, error);
+    throw new Error('Failed to fetch messages from DB.');
   }
 }
 
 const insertAIResponseToDb = async (ctx, response) => {
+  if (!client) throw new Error('MongoDB client is not connected.');
+
   if (!response) return;
 
-  if (!client) throw new Error('MongoDB client is not connected');
-
-  const db = client.db('tg_db');
-  const collection = db.collection('messages');
+  const db = client.db(DB_NAME);
+  const collection = db.collection(COLLECTION_NAME);
 
   const encryptedText = encryptText(response);
 
@@ -77,10 +71,7 @@ const insertAIResponseToDb = async (ctx, response) => {
 }
 
 const insertMessageToDb = async (body) => {
-  if (!client) throw new Error('MongoDB client is not connected');
-
-  const db = client.db('tg_db');
-  const collection = db.collection('messages');
+  if (!client) throw new Error('MongoDB client is not connected.');
 
   const messageData = extractMessageData(body);
 
@@ -95,7 +86,7 @@ const insertMessageToDb = async (body) => {
   // Encrypt the message text before inserting
   const encryptedText = encryptText(clearedText);
 
-  await collection.insertOne({
+  await client.db(DB_NAME).collection(COLLECTION_NAME).insertOne({
     chatId,
     message: encryptedText,
     userName,

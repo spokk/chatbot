@@ -1,5 +1,7 @@
 const { generateAIImageResponse } = require('../services/aiService');
+
 const { getImageToProcess, getLargestPhotoUrl } = require('../utils/image');
+const { log } = require('../utils/logger');
 
 
 const handleAIImageRecognition = async (ctx) => {
@@ -9,6 +11,7 @@ const handleAIImageRecognition = async (ctx) => {
 
   if (!imgObject) {
     console.error('No image to process.');
+    await ctx.reply('⚠️ No image or prompt found. Please send an image with a caption or reply to an image with a prompt.');
     return;
   }
 
