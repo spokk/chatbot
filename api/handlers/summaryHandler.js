@@ -26,7 +26,7 @@ const handleAISummary = async (ctx) => {
     await ctx.reply(summary, { reply_to_message_id: ctx.message.message_id });
   } catch (err) {
     console.error('Summary request error:', err);
-    await ctx.reply('⚠️ Error while processing summary request.');
+    await ctx.reply('⚠️ Error while processing summary request. Try again...');
   }
 };
 

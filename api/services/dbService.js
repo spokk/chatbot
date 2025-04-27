@@ -76,7 +76,12 @@ const insertAIResponseToDb = async (ctx, response) => {
   });
 }
 
-const insertMessageToDb = async (body, collection) => {
+const insertMessageToDb = async (body) => {
+  if (!client) throw new Error('MongoDB client is not connected');
+
+  const db = client.db('tg_db');
+  const collection = db.collection('messages');
+
   const messageData = extractMessageData(body);
 
   if (!messageData) return;

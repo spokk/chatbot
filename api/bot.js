@@ -33,18 +33,14 @@ module.exports = async (req, res) => {
 
   bot.on(message('photo'), async (ctx) => { await imageHandlerRouter(ctx) });
 
-
-  // Connect to MongoDB
-  const dbClient = await connectToDb();
-  const db = dbClient.db('tg_db');
-  const collection = db.collection('messages');
-
   try {
-    await Promise.all([bot.handleUpdate(req.body), insertMessageToDb(req.body, collection)]);
+    await connectToDb();
+
+    await Promise.all([bot.handleUpdate(req.body), insertMessageToDb(req.body)]);
 
     res.status(200).send('OK');
   } catch (err) {
-    console.error('Update handling failed:', err);
-    res.status(500).send('Error processing update');
+    console.error('Bot handling failed:', err);
+    res.status(500).send('Error processing bot handling.');
   }
 };
