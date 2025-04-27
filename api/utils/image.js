@@ -54,11 +54,12 @@ const processImagePart = async (ctx, part) => {
   if (part.inlineData) {
     const imageData = part.inlineData.data;
     const buffer = Buffer.from(imageData, 'base64');
-    const caption = {
+    const options = {
       caption: `Here is your generated image, ${ctx.message.from?.first_name || ctx.message.from?.username}!`,
+      reply_to_message_id: ctx.message.message_id
     };
 
-    await ctx.replyWithPhoto({ source: buffer }, { ...caption });
+    await ctx.replyWithPhoto({ source: buffer }, { ...options });
   }
 };
 
