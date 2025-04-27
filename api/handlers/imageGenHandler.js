@@ -7,7 +7,9 @@ const { log } = require('../utils/logger');
 const handleAIImageGen = async (ctx) => {
   log(ctx.message?.text, 'Received image generation request:');
 
-  if (!ctx.message?.text) {
+  const prompt = clearText(ctx.message?.text, ctx.me)
+
+  if (!prompt) {
     await ctx.reply('⚠️ No input provided. Please send a prompt for image generation.');
     return;
   }
@@ -15,9 +17,7 @@ const handleAIImageGen = async (ctx) => {
   try {
     await ctx.sendChatAction('typing');
 
-    const contents = clearText(ctx.message?.text, ctx.me) || "No request provided."
-
-    const response = await generateAIImage(contents)
+    const response = await generateAIImage(prompt)
 
     await processAIImageResponse(ctx, response);
   } catch (error) {
