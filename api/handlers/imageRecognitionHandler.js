@@ -19,9 +19,14 @@ const handleAIImageRecognition = async (ctx) => {
     await ctx.sendChatAction('typing');
 
     const fileUrl = await getLargestPhotoUrl(ctx, imgObject.photos);
-    const aiResponse = await generateAIImageResponse(fileUrl, imgObject.prompt);
+    const response = await generateAIImageResponse(fileUrl, imgObject.prompt);
 
-    await ctx.reply(`${aiResponse}`, { reply_to_message_id: ctx.message.message_id });
+    if (!response) {
+      await ctx.reply('⚠️ AI returned nothing. Try again...', { reply_to_message_id: ctx.message.message_id });
+      return;
+    }
+
+    await ctx.reply(`${response}`, { reply_to_message_id: ctx.message.message_id });
   } catch (err) {
     console.error('Error processing image request:', err);
     await ctx.reply('⚠️ Error while processing the image request.');
