@@ -60,21 +60,26 @@ const processImagePart = async (ctx, part) => {
     };
 
     await ctx.replyWithPhoto({ source: buffer }, { ...options });
+
+    return true
   }
+
+  return false
 };
 
 // Main function to process AI image response
 const processAIImageResponse = async (ctx, response) => {
-  const parts = response.candidates[0]?.content?.parts;
+  let repliedWithImg = false;
 
-  if (!parts || !parts[0]?.inlineData) {
-    await handleMissingImageData(ctx, response);
-    return;
-  }
+  const parts = response.candidates[0]?.content?.parts || [];
 
   for (const part of parts) {
-    await processImagePart(ctx, part);
+    repliedWithImg = await processImagePart(ctx, part);
+
+    if (repliedWithImg) return;
   }
+
+  if (!repliedWithImg) await handleMissingImageData(ctx, response);
 };
 
 
