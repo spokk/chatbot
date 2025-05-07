@@ -11,7 +11,7 @@ const handleAIImageRecognition = async (ctx) => {
 
   if (!imgObject) {
     console.error('No image to process.');
-    await ctx.reply('⚠️ No image or prompt found. Please send an image with a caption or reply to an image with a prompt.');
+    await ctx.reply('⚠️ No image or prompt found. Please send an image with a caption or reply to an image with a prompt.', { reply_to_message_id: ctx.message.message_id });
     return;
   }
 
@@ -29,7 +29,7 @@ const handleAIImageRecognition = async (ctx) => {
     await ctx.reply(`${response}`, { reply_to_message_id: ctx.message.message_id });
   } catch (err) {
     console.error('Error processing image request:', err);
-    await ctx.reply('⚠️ Error while processing the image request.');
+    await ctx.reply('⚠️ Error while processing the image request.', { reply_to_message_id: ctx.message.message_id });
   }
 };
 

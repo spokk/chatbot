@@ -44,7 +44,7 @@ const getLargestPhotoUrl = async (ctx, photos) => {
 
 // Helper function to handle missing image data
 const handleMissingImageData = async (ctx, response) => {
-  console.error('AI generated no image:', { content: response.candidates[0]?.content });
+  console.error('AI generated no image: ', response);
   const fallbackMessage = response.candidates[0]?.content?.parts[0]?.text || 'AI generated nothing. Try again...';
   await ctx.reply(`⚠️ ${fallbackMessage}`, { reply_to_message_id: ctx.message.message_id });
 };

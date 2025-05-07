@@ -7,7 +7,7 @@ const handleAIMessage = async (ctx) => {
   const prompt = clearText(ctx.message?.text, ctx.me);
 
   if (!prompt) {
-    await ctx.reply('⚠️ No input provided. Please send a message for AI processing.');
+    await ctx.reply('⚠️ No input provided. Please send a message for AI processing.', { reply_to_message_id: ctx.message.message_id });
     return;
   }
 
@@ -17,7 +17,7 @@ const handleAIMessage = async (ctx) => {
     const response = await generateAIResponse(prompt, history);
 
     if (!response) {
-      await ctx.reply('⚠️ No response from AI. Try again...');
+      await ctx.reply('⚠️ No response from AI. Try again...', { reply_to_message_id: ctx.message.message_id });
       return;
     }
 
@@ -27,7 +27,7 @@ const handleAIMessage = async (ctx) => {
     ]);
   } catch (err) {
     console.error('AI request error:', err);
-    await ctx.reply('⚠️ Error while communicating with AI. Try again...');
+    await ctx.reply('⚠️ Error while communicating with AI. Try again...', { reply_to_message_id: ctx.message.message_id });
   }
 };
 

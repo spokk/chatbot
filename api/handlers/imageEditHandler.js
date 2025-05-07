@@ -10,7 +10,7 @@ const handleAIImageEdit = async (ctx) => {
 
   if (!imgObject) {
     console.error('No image to process.');
-    await ctx.reply('⚠️ No image to process. Please send an image with a caption.');
+    await ctx.reply('⚠️ No image to process. Please send an image with a caption.', { reply_to_message_id: ctx.message.message_id });
     return;
   }
 
@@ -23,7 +23,7 @@ const handleAIImageEdit = async (ctx) => {
     await processAIImageResponse(ctx, response);
   } catch (error) {
     console.error('Error processing image request:', error);
-    await ctx.reply('⚠️ Error while processing the image generation request. Try again...');
+    await ctx.reply('⚠️ Error while processing the image generation request. Try again...', { reply_to_message_id: ctx.message.message_id });
   }
 }
 

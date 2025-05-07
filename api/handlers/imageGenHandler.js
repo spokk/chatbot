@@ -10,7 +10,7 @@ const handleAIImageGen = async (ctx) => {
   const prompt = clearText(ctx.message?.text, ctx.me)
 
   if (!prompt) {
-    await ctx.reply('⚠️ No input provided. Please send a prompt for image generation.');
+    await ctx.reply('⚠️ No input provided. Please send a prompt for image generation.', { reply_to_message_id: ctx.message.message_id });
     return;
   }
 
@@ -22,7 +22,7 @@ const handleAIImageGen = async (ctx) => {
     await processAIImageResponse(ctx, response);
   } catch (error) {
     console.error('Error processing image request:', error);
-    await ctx.reply('⚠️ Error while processing the image generation request. Try again...');
+    await ctx.reply('⚠️ Error while processing the image generation request. Try again...', { reply_to_message_id: ctx.message.message_id });
   }
 }
 
