@@ -78,7 +78,7 @@ const generateAIChat = async (contents, history, systemInstruction) => {
 // Function to generate AI image
 const generateAIImage = async (contents) => {
   console.log('AI image generation input:', contents);
-  const aiRequest = createAIRequest("gemini-2.0-flash-exp-image-generation", contents, {
+  const aiRequest = createAIRequest("gemini-2.0-flash-preview-image-generation", contents, {
     numberOfImages: 1,
     responseModalities: [Modality.TEXT, Modality.IMAGE],
   });
