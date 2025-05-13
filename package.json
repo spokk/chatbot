@@ -2,9 +2,7 @@
   "name": "bot",
   "version": "1.0.0",
   "main": "api/bot.js",
-  "scripts": {
-    "start": "node api/bot.js"
-  },
+  "scripts": {},
   "keywords": [],
   "author": "spokk",
   "license": "MIT",

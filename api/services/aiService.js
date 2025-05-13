@@ -7,10 +7,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 // Constants
 const MAX_TIME_TO_GENERATE = 50000; // 50 seconds
-const MAX_OUTPUT_TOKENS = {
-  CHAT: 600,
-  SUMMARY: 600,
-};
+const MAX_OUTPUT_TOKENS = 600
 const BASE_INSTRUCTIONS = 'Prefer concise answer. Do not use special characters.';
 const SAFETY_SETTINGS = [
   { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
@@ -20,6 +17,7 @@ const SAFETY_SETTINGS = [
   { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_ONLY_HIGH" },
 ];
 const BASE_MODEL = "gemini-2.5-flash-preview-04-17"
+const IMG_MODEL = "gemini-2.0-flash-preview-image-generation"
 
 // Helper function to handle timeouts
 const withTimeout = async (promise, timeoutMs) => {
@@ -78,7 +76,7 @@ const generateAIChat = async (contents, history, systemInstruction) => {
 // Function to generate AI image
 const generateAIImage = async (contents) => {
   console.log('AI image generation input:', contents);
-  const aiRequest = createAIRequest("gemini-2.0-flash-preview-image-generation", contents, {
+  const aiRequest = createAIRequest(IMG_MODEL, contents, {
     numberOfImages: 1,
     responseModalities: [Modality.TEXT, Modality.IMAGE],
   });
@@ -98,7 +96,7 @@ const prepareAIImageContent = async (imageURL, caption) => {
 // Function to generate AI image response
 const generateAIImageResponse = async (imageURL, caption) => {
   const contents = await prepareAIImageContent(imageURL, caption);
-  return generateAIContent(contents, BASE_INSTRUCTIONS, MAX_OUTPUT_TOKENS.CHAT);
+  return generateAIContent(contents, BASE_INSTRUCTIONS, MAX_OUTPUT_TOKENS);
 };
 
 // Function to generate AI image edit response
@@ -115,7 +113,7 @@ const generateAIResponse = async (contents, history = []) => {
 // Function to generate AI summary
 const generateAISummary = async (contents) => {
   const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation. Prefer answer in Ukrainian. ${BASE_INSTRUCTIONS}`;
-  return generateAIContent(contents, systemInstruction, MAX_OUTPUT_TOKENS.SUMMARY);
+  return generateAIContent(contents, systemInstruction, MAX_OUTPUT_TOKENS);
 };
 
 module.exports = {
