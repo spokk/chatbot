@@ -3,37 +3,37 @@ const { MongoClient } = require('mongodb');
 const { encryptText, decryptText } = require('../utils/crypto');
 const { clearText } = require('../utils/text');
 
-let client;
+let clientPromise; // Use a promise to avoid race conditions
 
 const DB_NAME = 'tg_db';
 const COLLECTION_NAME = 'messages';
 
+// Singleton connection using a promise
 const connectToDb = async () => {
-  if (client) {
-    console.log('Using existing MongoDB connection.');
-    return client;
+  if (!clientPromise) {
+    clientPromise = (async () => {
+      const client = new MongoClient(process.env.MONGO_URI, {
+        tls: true,
+        tlsAllowInvalidCertificates: false,
+        maxPoolSize: 20, // Increased pool size for more concurrency
+        minPoolSize: 2,  // Optional: keep some connections always open
+      });
+      await client.connect();
+      console.log('MongoDB connected successfully.');
+      return client;
+    })();
   }
+  return clientPromise;
+};
 
-  console.log('Connecting to MongoDB...');
-  client = new MongoClient(process.env.MONGO_URI, {
-    tls: true,
-    tlsAllowInvalidCertificates: false,
-    maxPoolSize: 10,
-  });
-
-  try {
-    await client.connect();
-    console.log('MongoDB connected successfully.');
-  } catch (error) {
-    console.error('MongoDB connection failed:', error);
-    throw new Error('Failed to connect to MongoDB.');
-  }
-
+const getClient = async () => {
+  const client = await connectToDb();
+  if (!client) throw new Error('MongoDB client is not connected.');
   return client;
 };
 
 const getMessagesFromDb = async (chatId, limit = 50) => {
-  if (!client) throw new Error('MongoDB client is not connected.');
+  const client = await getClient();
 
   const db = client.db(DB_NAME);
   const collection = db.collection(COLLECTION_NAME);
@@ -53,9 +53,9 @@ const getMessagesFromDb = async (chatId, limit = 50) => {
 }
 
 const insertAIResponseToDb = async (ctx, response) => {
-  if (!client) throw new Error('MongoDB client is not connected.');
-
   if (!response) return;
+
+  const client = await getClient();
 
   const db = client.db(DB_NAME);
   const collection = db.collection(COLLECTION_NAME);
@@ -71,7 +71,7 @@ const insertAIResponseToDb = async (ctx, response) => {
 }
 
 const insertMessageToDb = async (body) => {
-  if (!client) throw new Error('MongoDB client is not connected.');
+  const client = await getClient();
 
   const messageData = extractMessageData(body);
 
