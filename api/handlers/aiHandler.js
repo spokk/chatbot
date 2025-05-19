@@ -4,6 +4,26 @@ import { insertAIResponseToDb, buildAIHistory } from '../services/dbService.js';
 
 import { clearText } from '../utils/text.js';
 
+// Helper function to send the response in chunks
+const sendResponseInChunks = async (ctx, response) => {
+  const chunkSize = 4000;
+
+  for (let i = 0; i < response.length; i += chunkSize) {
+    const chunk = response.slice(i, i + chunkSize);
+
+    try {
+      if (i === 0) {
+        await ctx.reply(chunk, { reply_to_message_id: ctx.message.message_id });
+      } else {
+        await ctx.reply(chunk);
+      }
+    } catch (err) {
+      console.error(`Failed to send chunk: ${chunk}`, err);
+      // Continue to the next chunk even if one fails
+    }
+  }
+};
+
 export const handleAIMessage = async (ctx) => {
   const prompt = clearText(ctx.message?.text, ctx.me);
 
@@ -29,26 +49,6 @@ export const handleAIMessage = async (ctx) => {
   } catch (err) {
     console.error('AI request error:', err);
     await ctx.reply('⚠️ Error while communicating with AI. Try again...', { reply_to_message_id: ctx.message.message_id });
-  }
-};
-
-// Helper function to send the response in chunks
-export const sendResponseInChunks = async (ctx, response) => {
-  const chunkSize = 4000;
-
-  for (let i = 0; i < response.length; i += chunkSize) {
-    const chunk = response.slice(i, i + chunkSize);
-
-    try {
-      if (i === 0) {
-        await ctx.reply(chunk, { reply_to_message_id: ctx.message.message_id });
-      } else {
-        await ctx.reply(chunk);
-      }
-    } catch (err) {
-      console.error(`Failed to send chunk: ${chunk}`, err);
-      // Continue to the next chunk even if one fails
-    }
   }
 };
 

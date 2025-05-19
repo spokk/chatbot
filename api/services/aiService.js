@@ -20,7 +20,7 @@ const BASE_MODEL = "gemini-2.5-flash-preview-04-17"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
 
 // Helper function to handle timeouts
-export const withTimeout = async (promise, timeoutMs) => {
+const withTimeout = async (promise, timeoutMs) => {
   const timeout = new Promise((resolve) =>
     setTimeout(() => resolve({ text: '⚠️ AI is taking too long to respond.' }), timeoutMs)
   );
@@ -28,7 +28,7 @@ export const withTimeout = async (promise, timeoutMs) => {
 };
 
 // Helper function to create AI request
-export const createAIRequest = (model, contents, config) => {
+const createAIRequest = (model, contents, config) => {
   return ai.models.generateContent({
     model,
     contents,
@@ -37,14 +37,14 @@ export const createAIRequest = (model, contents, config) => {
 };
 
 // Helper function to handle AI response
-export const handleAIResponse = async (aiRequest, timeout) => {
+const handleAIResponse = async (aiRequest, timeout) => {
   const response = await withTimeout(aiRequest, timeout);
   log(response, 'AI chat generation response:');
   return response?.text || null;
 };
 
 // Function to generate AI content
-export const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
+const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
   log(contents, 'AI content generation input:');
   const aiRequest = createAIRequest(BASE_MODEL,
     contents,
@@ -58,7 +58,7 @@ export const generateAIContent = async (contents, systemInstruction, maxOutputTo
 };
 
 // Function to generate AI chat
-export const generateAIChat = async (contents, history, systemInstruction) => {
+const generateAIChat = async (contents, history, systemInstruction) => {
   log(contents, 'AI chat generation input:');
   const chat = ai.chats.create({
     model: BASE_MODEL,
@@ -73,6 +73,16 @@ export const generateAIChat = async (contents, history, systemInstruction) => {
   return handleAIResponse(aiRequest(contents), MAX_TIME_TO_GENERATE);
 };
 
+// Helper function to prepare AI image content
+const prepareAIImageContent = async (imageURL, caption) => {
+  const imageBuffer = await downloadImageAsBuffer(imageURL);
+  const base64ImageData = Buffer.from(imageBuffer).toString('base64');
+  return [
+    { inlineData: { mimeType: 'image/jpeg', data: base64ImageData } },
+    { text: caption },
+  ];
+};
+
 // Function to generate AI image
 export const generateAIImage = async (contents) => {
   console.log('AI image generation input:', contents);
@@ -81,16 +91,6 @@ export const generateAIImage = async (contents) => {
     responseModalities: [Modality.TEXT, Modality.IMAGE],
   });
   return withTimeout(aiRequest, MAX_TIME_TO_GENERATE);
-};
-
-// Helper function to prepare AI image content
-export const prepareAIImageContent = async (imageURL, caption) => {
-  const imageBuffer = await downloadImageAsBuffer(imageURL);
-  const base64ImageData = Buffer.from(imageBuffer).toString('base64');
-  return [
-    { inlineData: { mimeType: 'image/jpeg', data: base64ImageData } },
-    { text: caption },
-  ];
 };
 
 // Function to generate AI image response
