@@ -1,10 +1,10 @@
-const { generateAIImage } = require('../services/aiService');
+import { generateAIImage } from '../services/aiService.js';
 
-const { processAIImageResponse } = require('../utils/image');
-const { clearText } = require('../utils/text');
-const { log } = require('../utils/logger');
+import { processAIImageResponse } from '../utils/image.js';
+import { clearText } from '../utils/text.js';
+import { log } from '../utils/logger.js';
 
-const handleAIImageGen = async (ctx) => {
+export const handleAIImageGen = async (ctx) => {
   log(ctx.message?.text, 'Received image generation request:');
 
   const prompt = clearText(ctx.message?.text, ctx.me)
@@ -25,5 +25,3 @@ const handleAIImageGen = async (ctx) => {
     await ctx.reply('⚠️ Error while processing the image generation request. Try again...', { reply_to_message_id: ctx.message.message_id });
   }
 }
-
-module.exports = { handleAIImageGen };

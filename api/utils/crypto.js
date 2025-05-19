@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+import crypto from 'crypto'
 
 // Encryption configuration
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
@@ -6,7 +6,7 @@ const ALGORITHM = process.env.ALGORITHM;
 const IV_LENGTH = 16; // Initialization vector length
 
 // Function to encrypt text
-const encryptText = (text) => {
+export const encryptText = (text) => {
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY), iv);
   let encrypted = cipher.update(text, 'utf8', 'hex');
@@ -15,7 +15,7 @@ const encryptText = (text) => {
 };
 
 // Function to decrypt text
-const decryptText = (encryptedText) => {
+export const decryptText = (encryptedText) => {
   // Check if the text is in the expected encrypted format
   if (!encryptedText.includes(':')) {
     return encryptedText; // Return the text as-is if it's not encrypted
@@ -32,5 +32,3 @@ const decryptText = (encryptedText) => {
     return encryptedText; // Return the original text if decryption fails
   }
 };
-
-module.exports = { encryptText, decryptText };

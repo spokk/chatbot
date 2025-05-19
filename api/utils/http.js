@@ -1,5 +1,5 @@
 // Helper function to download the image as a buffer
-const downloadImageAsBuffer = async (imageURL) => {
+export const downloadImageAsBuffer = async (imageURL) => {
   const response = await fetch(imageURL);
 
   if (!response.ok) {
@@ -9,5 +9,3 @@ const downloadImageAsBuffer = async (imageURL) => {
   const arrayBuffer = await response.arrayBuffer();
   return Buffer.from(arrayBuffer);
 };
-
-module.exports = { downloadImageAsBuffer };

@@ -1,9 +1,10 @@
-const { generateAIResponse } = require('../services/aiService');
-const { insertAIResponseToDb, buildAIHistory } = require('../services/dbService');
+import { generateAIResponse } from '../services/aiService.js';
 
-const { clearText } = require('../utils/text');
+import { insertAIResponseToDb, buildAIHistory } from '../services/dbService.js';
 
-const handleAIMessage = async (ctx) => {
+import { clearText } from '../utils/text.js';
+
+export const handleAIMessage = async (ctx) => {
   const prompt = clearText(ctx.message?.text, ctx.me);
 
   if (!prompt) {
@@ -32,7 +33,7 @@ const handleAIMessage = async (ctx) => {
 };
 
 // Helper function to send the response in chunks
-const sendResponseInChunks = async (ctx, response) => {
+export const sendResponseInChunks = async (ctx, response) => {
   const chunkSize = 4000;
 
   for (let i = 0; i < response.length; i += chunkSize) {
@@ -51,5 +52,3 @@ const sendResponseInChunks = async (ctx, response) => {
   }
 };
 
-
-module.exports = { handleAIMessage };

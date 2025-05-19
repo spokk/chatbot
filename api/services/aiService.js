@@ -1,7 +1,7 @@
-const { GoogleGenAI, Modality } = require('@google/genai');
+import { GoogleGenAI, Modality } from '@google/genai';
 
-const { downloadImageAsBuffer } = require('../utils/http');
-const { log } = require('../utils/logger');
+import { downloadImageAsBuffer } from '../utils/http.js';
+import { log } from '../utils/logger.js';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
@@ -20,7 +20,7 @@ const BASE_MODEL = "gemini-2.5-flash-preview-04-17"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
 
 // Helper function to handle timeouts
-const withTimeout = async (promise, timeoutMs) => {
+export const withTimeout = async (promise, timeoutMs) => {
   const timeout = new Promise((resolve) =>
     setTimeout(() => resolve({ text: '⚠️ AI is taking too long to respond.' }), timeoutMs)
   );
@@ -28,7 +28,7 @@ const withTimeout = async (promise, timeoutMs) => {
 };
 
 // Helper function to create AI request
-const createAIRequest = (model, contents, config) => {
+export const createAIRequest = (model, contents, config) => {
   return ai.models.generateContent({
     model,
     contents,
@@ -37,14 +37,14 @@ const createAIRequest = (model, contents, config) => {
 };
 
 // Helper function to handle AI response
-const handleAIResponse = async (aiRequest, timeout) => {
+export const handleAIResponse = async (aiRequest, timeout) => {
   const response = await withTimeout(aiRequest, timeout);
   log(response, 'AI chat generation response:');
   return response?.text || null;
 };
 
 // Function to generate AI content
-const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
+export const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
   log(contents, 'AI content generation input:');
   const aiRequest = createAIRequest(BASE_MODEL,
     contents,
@@ -58,7 +58,7 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
 };
 
 // Function to generate AI chat
-const generateAIChat = async (contents, history, systemInstruction) => {
+export const generateAIChat = async (contents, history, systemInstruction) => {
   log(contents, 'AI chat generation input:');
   const chat = ai.chats.create({
     model: BASE_MODEL,
@@ -74,7 +74,7 @@ const generateAIChat = async (contents, history, systemInstruction) => {
 };
 
 // Function to generate AI image
-const generateAIImage = async (contents) => {
+export const generateAIImage = async (contents) => {
   console.log('AI image generation input:', contents);
   const aiRequest = createAIRequest(IMG_MODEL, contents, {
     numberOfImages: 1,
@@ -84,7 +84,7 @@ const generateAIImage = async (contents) => {
 };
 
 // Helper function to prepare AI image content
-const prepareAIImageContent = async (imageURL, caption) => {
+export const prepareAIImageContent = async (imageURL, caption) => {
   const imageBuffer = await downloadImageAsBuffer(imageURL);
   const base64ImageData = Buffer.from(imageBuffer).toString('base64');
   return [
@@ -94,32 +94,24 @@ const prepareAIImageContent = async (imageURL, caption) => {
 };
 
 // Function to generate AI image response
-const generateAIImageResponse = async (imageURL, caption) => {
+export const generateAIImageResponse = async (imageURL, caption) => {
   const contents = await prepareAIImageContent(imageURL, caption);
   return generateAIContent(contents, BASE_INSTRUCTIONS, MAX_OUTPUT_TOKENS);
 };
 
 // Function to generate AI image edit response
-const generateAIImageEditResponse = async (imageURL, caption) => {
+export const generateAIImageEditResponse = async (imageURL, caption) => {
   const contents = await prepareAIImageContent(imageURL, caption);
   return generateAIImage(contents);
 };
 
 // Function to generate AI response
-const generateAIResponse = async (contents, history = []) => {
+export const generateAIResponse = async (contents, history = []) => {
   return generateAIChat(contents, history, BASE_INSTRUCTIONS);
 };
 
 // Function to generate AI summary
-const generateAISummary = async (contents) => {
+export const generateAISummary = async (contents) => {
   const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation. Prefer answer in Ukrainian. ${BASE_INSTRUCTIONS}`;
   return generateAIContent(contents, systemInstruction, MAX_OUTPUT_TOKENS);
-};
-
-module.exports = {
-  generateAIResponse,
-  generateAISummary,
-  generateAIImageResponse,
-  generateAIImage,
-  generateAIImageEditResponse,
 };

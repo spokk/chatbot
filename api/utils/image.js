@@ -1,18 +1,18 @@
-const { clearText } = require('../utils/text');
+import { clearText } from '../utils/text.js';
 
 // Helper function to check if a command matches
-const isCommand = (ctx, command) => {
+export const isCommand = (ctx, command) => {
   const text = ctx.message?.caption || ctx.message?.text || '';
   return text.startsWith(command) || text.startsWith(`${command}@${ctx.me}`);
 };
 
 // Check if the message is an image generation command
-const getIsImgCommand = (ctx) => isCommand(ctx, '/img');
+export const getIsImgCommand = (ctx) => isCommand(ctx, '/img');
 
 // Check if the message is an image edit command
-const getIsEditCommand = (ctx) => isCommand(ctx, '/edit');
+export const getIsEditCommand = (ctx) => isCommand(ctx, '/edit');
 
-const getImageToProcess = (ctx) => {
+export const getImageToProcess = (ctx) => {
   const prompt = clearText(ctx.message?.caption, ctx.me)
   const photos = ctx.message?.photo;
 
@@ -34,7 +34,7 @@ const getImageToProcess = (ctx) => {
 };
 
 // Get the URL of the largest photo
-const getLargestPhotoUrl = async (ctx, photos) => {
+export const getLargestPhotoUrl = async (ctx, photos) => {
   const largestPhoto = photos[photos.length - 1];
   const photoId = largestPhoto.file_id;
 
@@ -43,14 +43,14 @@ const getLargestPhotoUrl = async (ctx, photos) => {
 };
 
 // Helper function to handle missing image data
-const handleMissingImageData = async (ctx, response) => {
+export const handleMissingImageData = async (ctx, response) => {
   console.error('AI generated no image: ', response);
   const fallbackMessage = response.candidates[0]?.content?.parts[0]?.text || 'AI generated nothing. Try again...';
   await ctx.reply(`⚠️ ${fallbackMessage}`, { reply_to_message_id: ctx.message.message_id });
 };
 
 // Helper function to process a single image part
-const processImagePart = async (ctx, part) => {
+export const processImagePart = async (ctx, part) => {
   if (part.inlineData) {
     const imageData = part.inlineData.data;
     const buffer = Buffer.from(imageData, 'base64');
@@ -68,7 +68,7 @@ const processImagePart = async (ctx, part) => {
 };
 
 // Main function to process AI image response
-const processAIImageResponse = async (ctx, response) => {
+export const processAIImageResponse = async (ctx, response) => {
   let repliedWithImg = false;
 
   const parts = response.candidates[0]?.content?.parts || [];
@@ -80,13 +80,4 @@ const processAIImageResponse = async (ctx, response) => {
   }
 
   if (!repliedWithImg) await handleMissingImageData(ctx, response);
-};
-
-
-module.exports = {
-  getIsImgCommand,
-  getIsEditCommand,
-  getImageToProcess,
-  getLargestPhotoUrl,
-  processAIImageResponse
 };

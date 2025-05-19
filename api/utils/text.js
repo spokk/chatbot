@@ -1,4 +1,4 @@
-const clearText = (text, botUsername = process.env.BOT_USERNAME) => {
+export const clearText = (text, botUsername = process.env.BOT_USERNAME) => {
   if (typeof text !== 'string') return '';
 
   const commands = ['/ai', '/sum', '/img', '/gen', '/edit'];
@@ -15,5 +15,3 @@ const clearText = (text, botUsername = process.env.BOT_USERNAME) => {
 
   return cleanedText.trim();
 };
-
-module.exports = { clearText };

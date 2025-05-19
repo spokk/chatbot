@@ -1,7 +1,7 @@
-const { MongoClient } = require('mongodb');
+import { MongoClient } from 'mongodb';
 
-const { encryptText, decryptText } = require('../utils/crypto');
-const { clearText } = require('../utils/text');
+import { encryptText, decryptText } from '../utils/crypto.js';
+import { clearText } from '../utils/text.js';
 
 let clientPromise; // Use a promise to avoid race conditions
 
@@ -9,7 +9,7 @@ const DB_NAME = 'tg_db';
 const COLLECTION_NAME = 'messages';
 
 // Singleton connection using a promise
-const connectToDb = async () => {
+export const connectToDb = async () => {
   if (!clientPromise) {
     clientPromise = (async () => {
       const client = new MongoClient(process.env.MONGO_URI, {
@@ -32,7 +32,7 @@ const getClient = async () => {
   return client;
 };
 
-const getMessagesFromDb = async (chatId, limit = 50) => {
+export const getMessagesFromDb = async (chatId, limit = 50) => {
   const client = await getClient();
 
   const db = client.db(DB_NAME);
@@ -52,7 +52,7 @@ const getMessagesFromDb = async (chatId, limit = 50) => {
   }
 }
 
-const insertAIResponseToDb = async (ctx, response) => {
+export const insertAIResponseToDb = async (ctx, response) => {
   if (!response) return;
 
   const client = await getClient();
@@ -70,7 +70,7 @@ const insertAIResponseToDb = async (ctx, response) => {
   });
 }
 
-const insertMessageToDb = async (body) => {
+export const insertMessageToDb = async (body) => {
   const client = await getClient();
 
   const messageData = extractMessageData(body);
@@ -95,7 +95,7 @@ const insertMessageToDb = async (body) => {
 };
 
 // Helper function to extract message data
-const extractMessageData = (body) => {
+export const extractMessageData = (body) => {
   const message = body?.message || body?.edited_message;
 
   if (!message || !message.chat?.id || !message.text) return null;
@@ -109,7 +109,7 @@ const extractMessageData = (body) => {
   };
 };
 
-const buildAIHistory = async (ctx) => {
+export const buildAIHistory = async (ctx) => {
   const messages = await getMessagesFromDb(ctx.message.chat.id, 15);
 
   // Decrypt messages and categorize them into user and model roles
@@ -148,5 +148,3 @@ const buildAIHistory = async (ctx) => {
     },
   ];
 };
-
-module.exports = { connectToDb, getMessagesFromDb, insertAIResponseToDb, buildAIHistory, insertMessageToDb };

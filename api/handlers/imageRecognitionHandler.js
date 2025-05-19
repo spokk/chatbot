@@ -1,10 +1,10 @@
-const { generateAIImageResponse } = require('../services/aiService');
+import { generateAIImageResponse } from '../services/aiService.js';
 
-const { getImageToProcess, getLargestPhotoUrl } = require('../utils/image');
-const { log } = require('../utils/logger');
+import { getImageToProcess, getLargestPhotoUrl } from '../utils/image.js';
+import { log } from '../utils/logger.js';
 
 
-const handleAIImageRecognition = async (ctx) => {
+export const handleAIImageRecognition = async (ctx) => {
   log(ctx.message?.text || ctx.message?.caption, 'Received image recognition request:');
 
   const imgObject = getImageToProcess(ctx);
@@ -32,5 +32,3 @@ const handleAIImageRecognition = async (ctx) => {
     await ctx.reply('⚠️ Error while processing the image request.', { reply_to_message_id: ctx.message.message_id });
   }
 };
-
-module.exports = { handleAIImageRecognition };

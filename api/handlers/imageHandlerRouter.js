@@ -1,8 +1,8 @@
-const { getIsEditCommand, getIsImgCommand } = require('../utils/image');
-const { handleAIImageEdit } = require('./imageEditHandler');
-const { handleAIImageRecognition } = require('./imageRecognitionHandler');
+import { getIsEditCommand, getIsImgCommand } from '../utils/image.js';
+import { handleAIImageEdit } from './imageEditHandler.js';
+import { handleAIImageRecognition } from './imageRecognitionHandler.js';
 
-const imageHandlerRouter = async (ctx) => {
+export const imageHandlerRouter = async (ctx) => {
   if (getIsEditCommand(ctx)) {
     await handleAIImageEdit(ctx)
     return
@@ -13,5 +13,3 @@ const imageHandlerRouter = async (ctx) => {
     return
   }
 }
-
-module.exports = { imageHandlerRouter };

@@ -1,8 +1,8 @@
-const { getMessagesFromDb } = require('../services/dbService');
-const { generateAISummary } = require('../services/aiService');
-const { decryptText } = require('../utils/crypto');
+import { getMessagesFromDb } from '../services/dbService.js';
+import { generateAISummary } from '../services/aiService.js';
+import { decryptText } from '../utils/crypto.js';
 
-const handleAISummary = async (ctx) => {
+export const handleAISummary = async (ctx) => {
   try {
     await ctx.sendChatAction('typing');
     const messages = await getMessagesFromDb(ctx.message.chat.id, 50);
@@ -29,5 +29,3 @@ const handleAISummary = async (ctx) => {
     await ctx.reply('⚠️ Error while processing summary request. Try again...', { reply_to_message_id: ctx.message.message_id });
   }
 };
-
-module.exports = { handleAISummary };

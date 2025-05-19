@@ -1,9 +1,9 @@
-const { generateAIImageEditResponse } = require('../services/aiService');
+import { generateAIImageEditResponse } from '../services/aiService.js';
 
-const { getImageToProcess, getLargestPhotoUrl, processAIImageResponse } = require('../utils/image');
-const { log } = require('../utils/logger');
+import { getImageToProcess, getLargestPhotoUrl, processAIImageResponse } from '../utils/image.js';
+import { log } from '../utils/logger.js';
 
-const handleAIImageEdit = async (ctx) => {
+export const handleAIImageEdit = async (ctx) => {
   log(ctx.message?.text || ctx.message?.caption, 'Received image edit request:');
 
   const imgObject = getImageToProcess(ctx);
@@ -26,5 +26,3 @@ const handleAIImageEdit = async (ctx) => {
     await ctx.reply('⚠️ Error while processing the image generation request. Try again...', { reply_to_message_id: ctx.message.message_id });
   }
 }
-
-module.exports = { handleAIImageEdit };
