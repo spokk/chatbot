@@ -11,7 +11,7 @@
   "license": "MIT",
   "description": "AI Chatbot for Telegram using Google GenAI",
   "dependencies": {
-    "@google/genai": "^0.15.0",
+    "@google/genai": "^1.0.0",
     "dotenv": "^16.5.0",
     "mongodb": "^6.16.0",
     "telegraf": "^4.16.3"

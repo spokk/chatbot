@@ -16,7 +16,7 @@ const SAFETY_SETTINGS = [
   { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
   { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_ONLY_HIGH" },
 ];
-const BASE_MODEL = "gemini-2.5-flash-preview-04-17"
+const BASE_MODEL = "gemini-2.5-flash-preview-05-20"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
 
 // Helper function to handle timeouts
