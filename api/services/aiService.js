@@ -7,7 +7,6 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 // Constants
 const MAX_TIME_TO_GENERATE = 50000; // 50 seconds
-const MAX_OUTPUT_TOKENS = 600
 const BASE_INSTRUCTIONS = 'Prefer concise answer. Do not use special characters.';
 const SAFETY_SETTINGS = [
   { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
@@ -44,7 +43,7 @@ const handleAIResponse = async (aiRequest, timeout) => {
 };
 
 // Function to generate AI content
-const generateAIContent = async (contents, systemInstruction, maxOutputTokens) => {
+const generateAIContent = async (contents, systemInstruction) => {
   log(contents, 'AI content generation input:');
   const aiRequest = createAIRequest(BASE_MODEL,
     contents,
@@ -52,7 +51,6 @@ const generateAIContent = async (contents, systemInstruction, maxOutputTokens) =
       safetySettings: SAFETY_SETTINGS,
       systemInstruction,
       temperature: 0.7,
-      maxOutputTokens,
     });
   return handleAIResponse(aiRequest, MAX_TIME_TO_GENERATE);
 };
@@ -96,7 +94,7 @@ export const generateAIImage = async (contents) => {
 // Function to generate AI image response
 export const generateAIImageResponse = async (imageURL, caption) => {
   const contents = await prepareAIImageContent(imageURL, caption);
-  return generateAIContent(contents, BASE_INSTRUCTIONS, MAX_OUTPUT_TOKENS);
+  return generateAIContent(contents, BASE_INSTRUCTIONS);
 };
 
 // Function to generate AI image edit response
@@ -113,5 +111,5 @@ export const generateAIResponse = async (contents, history = []) => {
 // Function to generate AI summary
 export const generateAISummary = async (contents) => {
   const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation. Prefer answer in Ukrainian. ${BASE_INSTRUCTIONS}`;
-  return generateAIContent(contents, systemInstruction, MAX_OUTPUT_TOKENS);
+  return generateAIContent(contents, systemInstruction);
 };
