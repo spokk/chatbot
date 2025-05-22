@@ -9,6 +9,7 @@ import { handleAISummary } from './handlers/summaryHandler.js';
 import { handleAIImageGen } from './handlers/imageGenHandler.js';
 import { handleAIImageEdit } from './handlers/imageEditHandler.js';
 import { imageHandlerRouter } from './handlers/imageHandlerRouter.js';
+import { handleAITextToSpeech } from './handlers/ttsHandler.js';
 import { log } from './utils/logger.js';
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
@@ -18,6 +19,7 @@ bot.command('sum', async (ctx) => { await handleAISummary(ctx) });
 bot.command('img', async (ctx) => { await handleAIImageRecognition(ctx) });
 bot.command('gen', async (ctx) => { await handleAIImageGen(ctx) });
 bot.command('edit', async (ctx) => { await handleAIImageEdit(ctx) });
+bot.command('voice', async (ctx) => { await handleAITextToSpeech(ctx) });
 bot.on(message('photo'), async (ctx) => { await imageHandlerRouter(ctx) });
 
 export default async (req, res) => {

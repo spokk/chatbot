@@ -17,6 +17,7 @@ const SAFETY_SETTINGS = [
 ];
 const BASE_MODEL = "gemini-2.5-flash-preview-05-20"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
+const VOICE_MODEL = "gemini-2.5-flash-preview-tts"
 
 // Helper function to handle timeouts
 const withTimeout = async (promise, timeoutMs) => {
@@ -89,6 +90,23 @@ export const generateAIImage = async (contents) => {
     responseModalities: [Modality.TEXT, Modality.IMAGE],
   });
   return withTimeout(aiRequest, MAX_TIME_TO_GENERATE);
+};
+
+export const generateAIVoice = async (contents) => {
+  log(contents, 'AI voice generation input:');
+  const aiRequest = createAIRequest(VOICE_MODEL,
+    [{ parts: [{ text: contents }] }],
+    {
+      responseModalities: [Modality.AUDIO],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: { voiceName: 'Sadaltager' },
+        },
+      },
+      safetySettings: SAFETY_SETTINGS,
+    });
+
+  return withTimeout(aiRequest, MAX_TIME_TO_GENERATE);;
 };
 
 // Function to generate AI image response
