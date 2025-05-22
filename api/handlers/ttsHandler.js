@@ -30,10 +30,13 @@ function convertBufferToOgg(inputBuffer) {
 export const handleAITextToSpeech = async (ctx) => {
   log(ctx.message?.text, 'Received voice generation request:');
 
-  const prompt = clearText(ctx.message?.text, ctx.me)
+  const prompt = clearText(ctx.message?.text, ctx.me);
 
   if (!prompt) {
-    await ctx.reply('⚠️ No input provided. Please send a prompt for voice generation.', { reply_to_message_id: ctx.message.message_id });
+    await ctx.reply(
+      '⚠️ No input provided. Please send a prompt for voice generation.',
+      { reply_to_message_id: ctx.message.message_id }
+    );
     return;
   }
 

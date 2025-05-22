@@ -1,7 +1,7 @@
 export const clearText = (text, botUsername = process.env.BOT_USERNAME) => {
   if (typeof text !== 'string') return '';
 
-  const commands = ['/ai', '/sum', '/img', '/gen', '/edit'];
+  const commands = ['/ai', '/sum', '/img', '/gen', '/edit', '/voice'];
   const botSpecificCommands = commands.map((cmd) => `${cmd}@${botUsername}`);
 
   // Combine all commands into a single array
