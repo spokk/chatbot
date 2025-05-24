@@ -8,7 +8,7 @@ import { Readable } from 'stream';
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
-function convertBufferToMp3(inputBuffer) {
+function convertBufferToMp3(inputBuffer, channels = 1, rate = 48000) {
   return new Promise((resolve, reject) => {
     const inputStream = new Readable();
     inputStream.push(inputBuffer);
@@ -16,9 +16,9 @@ function convertBufferToMp3(inputBuffer) {
 
     const chunks = [];
     ffmpeg(inputStream)
-      .inputFormat('s16le')
-      .audioFrequency(16000)
-      .audioChannels(1)
+      .inputFormat('s16le') // PCM 16-bit little-endian
+      .audioChannels(channels)
+      .audioFrequency(rate)
       .audioCodec('libmp3lame')
       .audioBitrate('128k')
       .format('mp3')
