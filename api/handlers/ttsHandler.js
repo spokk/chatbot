@@ -30,7 +30,7 @@ function convertBufferToMp3(inputBuffer, channels = 1, rate = 48000) {
 }
 
 export const handleAITextToSpeech = async (ctx) => {
-  const prompt = clearText(ctx.message?.text, ctx.me);
+  const prompt = clearText(ctx.message?.reply_to_message?.text || ctx.message?.text, ctx.me);
 
   if (!prompt) {
     await ctx.reply(
