@@ -17,7 +17,7 @@ function convertBufferToOgg(inputBuffer) {
     const chunks = [];
     ffmpeg(inputStream)
       .inputFormat('s16le') // PCM signed 16-bit little-endian
-      .audioFrequency(24000)
+      .audioFrequency(16000) // <-- Try 16000 if 24000 sounds wrong
       .audioChannels(1)
       .toFormat('ogg')
       .on('error', reject)
@@ -28,8 +28,6 @@ function convertBufferToOgg(inputBuffer) {
 }
 
 export const handleAITextToSpeech = async (ctx) => {
-  log(ctx.message?.text, 'Received voice generation request:');
-
   const prompt = clearText(ctx.message?.text, ctx.me);
 
   if (!prompt) {
