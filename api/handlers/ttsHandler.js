@@ -8,7 +8,7 @@ import { Readable } from 'stream';
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
-function convertBufferToOgg(inputBuffer) {
+function convertBufferToMp3(inputBuffer) {
   return new Promise((resolve, reject) => {
     const inputStream = new Readable();
     inputStream.push(inputBuffer);
@@ -16,10 +16,12 @@ function convertBufferToOgg(inputBuffer) {
 
     const chunks = [];
     ffmpeg(inputStream)
-      .inputFormat('s16le') // PCM signed 16-bit little-endian
-      .audioFrequency(16000) // <-- Try 16000 if 24000 sounds wrong
+      .inputFormat('s16le')
+      .audioFrequency(16000)
       .audioChannels(1)
-      .toFormat('ogg')
+      .audioCodec('libmp3lame')
+      .audioBitrate('128k')
+      .format('mp3')
       .on('error', reject)
       .on('end', () => resolve(Buffer.concat(chunks)))
       .pipe()
@@ -39,7 +41,7 @@ export const handleAITextToSpeech = async (ctx) => {
   }
 
   try {
-    await ctx.sendChatAction('typing');
+    await ctx.sendChatAction('upload_audio');
 
     const response = await generateAIVoice(prompt);
 
@@ -60,11 +62,14 @@ export const handleAITextToSpeech = async (ctx) => {
         return;
       }
 
-      const oggBuffer = await convertBufferToOgg(audioBuffer);
+      const mp3Buffer = await convertBufferToMp3(audioBuffer);
 
-      await ctx.replyWithVoice({ source: oggBuffer }, { caption: prompt, reply_to_message_id: ctx.message.message_id });
+      await ctx.replyWithAudio(
+        { source: mp3Buffer, filename: 'tts.mp3' },
+        { reply_to_message_id: ctx.message.message_id, title: 'AI Voice' }
+      );
     } catch (err) {
-      console.error('Error converting audio buffer to OGG:', err);
+      console.error('Error converting audio buffer to MP3:', err);
       await ctx.reply('⚠️ Error while converting audio data. Try again...', { reply_to_message_id: ctx.message.message_id });
     }
 
@@ -74,7 +79,7 @@ export const handleAITextToSpeech = async (ctx) => {
     // Handle 429 Too Many Requests
     if (error?.response?.status === 429 || error?.message?.includes('429')) {
       await ctx.reply(
-        '🚫 Rate limit exceeded: You have reached the maximum number of requests. Please try again later.',
+        '🚫 Rate limit exceeded: You have reached the maximum number of requests. Please try again tomorrow.',
         { reply_to_message_id: ctx.message.message_id }
       );
       return;
