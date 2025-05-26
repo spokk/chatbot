@@ -29,7 +29,7 @@ function convertBufferToWav(inputBuffer, channels = 2, rate = 48000) {
 }
 
 export const handleAITextToSpeech = async (ctx) => {
-  const prompt = clearText(ctx.message?.reply_to_message?.text || ctx.message?.text, ctx.me);
+  const prompt = clearText(ctx.message?.text, ctx.me) || clearText(ctx.message?.reply_to_message?.text, ctx.me);
 
   if (!prompt) {
     await ctx.reply(
@@ -63,12 +63,10 @@ export const handleAITextToSpeech = async (ctx) => {
 
       const wavBuffer = await convertBufferToWav(audioBuffer);
 
-      await ctx.replyWithAudio(
-        { source: wavBuffer },
-        { reply_to_message_id: ctx.message.message_id, title: 'AI Voice' }
-      );
+      ctx.deleteMessage(ctx.message.message_id).catch(() => { });
+      await ctx.replyWithAudio({ source: wavBuffer }, { title: prompt, performer: 'AI Voice' });
     } catch (err) {
-      console.error('Error converting audio buffer to MP3:', err);
+      console.error('Error converting audio buffer to WAV:', err);
       await ctx.reply('⚠️ Error while converting audio data. Try again...', { reply_to_message_id: ctx.message.message_id });
     }
 
