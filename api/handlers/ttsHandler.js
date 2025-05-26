@@ -8,7 +8,7 @@ import { Readable } from 'stream';
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
-function convertBufferToMp3(inputBuffer, channels = 1, rate = 48000) {
+function convertBufferToWav(inputBuffer, channels = 2, rate = 48000) {
   return new Promise((resolve, reject) => {
     const inputStream = new Readable();
     inputStream.push(inputBuffer);
@@ -19,9 +19,8 @@ function convertBufferToMp3(inputBuffer, channels = 1, rate = 48000) {
       .inputFormat('s16le') // PCM 16-bit little-endian
       .audioChannels(channels)
       .audioFrequency(rate)
-      .audioCodec('libmp3lame')
-      .audioBitrate('128k')
-      .format('mp3')
+      .audioCodec('pcm_s16le') // 16-bit PCM for WAV
+      .format('wav')
       .on('error', reject)
       .on('end', () => resolve(Buffer.concat(chunks)))
       .pipe()
@@ -62,10 +61,10 @@ export const handleAITextToSpeech = async (ctx) => {
         return;
       }
 
-      const mp3Buffer = await convertBufferToMp3(audioBuffer);
+      const wavBuffer = await convertBufferToWav(audioBuffer);
 
       await ctx.replyWithAudio(
-        { source: mp3Buffer, filename: 'tts.mp3' },
+        { source: wavBuffer },
         { reply_to_message_id: ctx.message.message_id, title: 'AI Voice' }
       );
     } catch (err) {
