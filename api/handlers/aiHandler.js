@@ -2,7 +2,7 @@ import { generateAIResponse } from '../services/aiService.js';
 
 import { insertAIResponseToDb, buildAIHistory } from '../services/dbService.js';
 
-import { clearText } from '../utils/text.js';
+import { getMessage } from '../utils/text.js';
 
 // Helper function to send the response in chunks
 const sendResponseInChunks = async (ctx, response) => {
@@ -25,7 +25,7 @@ const sendResponseInChunks = async (ctx, response) => {
 };
 
 export const handleAIMessage = async (ctx) => {
-  const prompt = clearText(ctx.message?.text, ctx.me);
+  const prompt = getMessage(ctx);
 
   if (!prompt) {
     await ctx.reply('⚠️ No input provided. Please send a message for AI processing.', { reply_to_message_id: ctx.message.message_id });

@@ -1,4 +1,4 @@
-import { clearText } from '../utils/text.js';
+import { getMessage } from '../utils/text.js';
 
 // Helper function to check if a command matches
 export const isCommand = (ctx, command) => {
@@ -13,7 +13,7 @@ export const getIsImgCommand = (ctx) => isCommand(ctx, '/img');
 export const getIsEditCommand = (ctx) => isCommand(ctx, '/edit');
 
 export const getImageToProcess = (ctx) => {
-  const prompt = clearText(ctx.message?.caption, ctx.me)
+  const prompt = getMessage(ctx);
   const photos = ctx.message?.photo;
 
   if (photos && prompt) {
@@ -22,7 +22,7 @@ export const getImageToProcess = (ctx) => {
 
   const replyPhotos = ctx.message?.reply_to_message?.photo;
   const replySticker = ctx.message?.reply_to_message?.sticker?.thumbnail;
-  const replyPrompt = clearText(ctx.message?.text, ctx.me)
+  const replyPrompt = getMessage(ctx);
 
   if (replyPrompt) {
     if (replyPhotos) return { photos: replyPhotos, prompt: replyPrompt };

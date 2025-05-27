@@ -1,5 +1,5 @@
 import { generateAIVoice } from '../services/aiService.js';
-import { clearText } from '../utils/text.js';
+import { getMessage } from '../utils/text.js';
 import { log } from '../utils/logger.js';
 
 import ffmpeg from 'fluent-ffmpeg';
@@ -29,7 +29,7 @@ function convertBufferToWav(inputBuffer, channels = 2, rate = 48000) {
 }
 
 export const handleAITextToSpeech = async (ctx) => {
-  const prompt = clearText(ctx.message?.text, ctx.me) || clearText(ctx.message?.reply_to_message?.text, ctx.me);
+  const prompt = getMessage(ctx);
 
   if (!prompt) {
     await ctx.reply(
