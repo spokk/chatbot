@@ -25,12 +25,14 @@ export const getMessage = (ctx) => {
   const message = clearText(ctx.message?.text, botUsername)
   if (message) return message;
 
+  const caption = clearText(ctx.message?.caption, botUsername)
+  if (caption) return caption;
+
   const replyMessage = clearText(ctx.message?.reply_to_message?.text, botUsername)
   if (replyMessage) return replyMessage;
 
   const replyCaption = clearText(ctx.message?.reply_to_message?.caption, botUsername)
   if (replyCaption) return replyCaption;
-
 
   return '';
 };
