@@ -1,30 +1,29 @@
+import wav from 'wav';
+import { Readable } from 'stream';
+
 import { generateAIVoice } from '../services/aiService.js';
 import { getMessage } from '../utils/text.js';
 import { log } from '../utils/logger.js';
 
-import ffmpeg from 'fluent-ffmpeg';
-import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
-import { Readable } from 'stream';
 
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-
-function convertBufferToWav(inputBuffer, channels = 2, rate = 48000) {
+function pcmBufferToWavBuffer(pcmBuffer, channels = 1, rate = 24000, sampleWidth = 2) {
   return new Promise((resolve, reject) => {
+    const writer = new wav.Writer({
+      channels,
+      sampleRate: rate,
+      bitDepth: sampleWidth * 8,
+    });
+
     const inputStream = new Readable();
-    inputStream.push(inputBuffer);
+    inputStream.push(pcmBuffer);
     inputStream.push(null);
 
     const chunks = [];
-    ffmpeg(inputStream)
-      .inputFormat('s16le') // PCM 16-bit little-endian
-      .audioChannels(channels)
-      .audioFrequency(rate)
-      .audioCodec('pcm_s16le') // 16-bit PCM for WAV
-      .format('wav')
-      .on('error', reject)
-      .on('end', () => resolve(Buffer.concat(chunks)))
-      .pipe()
-      .on('data', chunk => chunks.push(chunk));
+    writer.on('data', chunk => chunks.push(chunk));
+    writer.on('finish', () => resolve(Buffer.concat(chunks)));
+    writer.on('error', reject);
+
+    inputStream.pipe(writer);
   });
 }
 
@@ -61,7 +60,7 @@ export const handleAITextToSpeech = async (ctx) => {
         return;
       }
 
-      const wavBuffer = await convertBufferToWav(audioBuffer);
+      const wavBuffer = await pcmBufferToWavBuffer(audioBuffer);
 
       ctx.deleteMessage(ctx.message.message_id).catch(() => { });
       await ctx.replyWithAudio({ source: wavBuffer }, { title: prompt, performer: 'AI Voice' });

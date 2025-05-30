@@ -101,7 +101,6 @@ export const generateAIVoice = async (contents) => {
       speechConfig: {
         voiceConfig: {
           prebuiltVoiceConfig: { voiceName: 'Sadaltager' },
-          pitch: 0
         },
       },
       safetySettings: SAFETY_SETTINGS,
