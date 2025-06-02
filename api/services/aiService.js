@@ -7,7 +7,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 // Constants
 const MAX_TIME_TO_GENERATE = 50000; // 50 seconds
-const BASE_INSTRUCTIONS = 'Prefer concise answer. Do not use special characters.';
+const BASE_INSTRUCTIONS = 'Do not halucinate. Do not make up facts. Prefer not too long answers.';
 const SAFETY_SETTINGS = [
   { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
   { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },

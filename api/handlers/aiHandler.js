@@ -1,3 +1,5 @@
+import removeMarkdown from 'remove-markdown';
+
 import { generateAIResponse } from '../services/aiService.js';
 
 import { insertAIResponseToDb, buildAIHistory } from '../services/dbService.js';
@@ -7,9 +9,11 @@ import { getMessage } from '../utils/text.js';
 // Helper function to send the response in chunks
 const sendResponseInChunks = async (ctx, response) => {
   const chunkSize = 4000;
+  // Remove markdown/formatting from the response
+  const plainResponse = removeMarkdown(response);
 
-  for (let i = 0; i < response.length; i += chunkSize) {
-    const chunk = response.slice(i, i + chunkSize);
+  for (let i = 0; i < plainResponse.length; i += chunkSize) {
+    const chunk = plainResponse.slice(i, i + chunkSize);
 
     try {
       if (i === 0) {
