@@ -22,6 +22,11 @@ bot.command('edit', async (ctx) => { await handleAIImageEdit(ctx) });
 bot.command('voice', async (ctx) => { await handleAITextToSpeech(ctx) });
 bot.on(message('photo'), async (ctx) => { await imageHandlerRouter(ctx) });
 
+bot.on('message', async (ctx) => {
+  // If in private chat and not a command, handle as /ai
+  if (ctx.chat?.type === 'private') { await handleAIMessage(ctx); }
+});
+
 export default async (req, res) => {
   log(req.body, 'Received request body:');
 
