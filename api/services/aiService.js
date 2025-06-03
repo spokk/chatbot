@@ -1,3 +1,5 @@
+import removeMarkdown from 'remove-markdown';
+
 import { GoogleGenAI, Modality } from '@google/genai';
 
 import { downloadImageAsBuffer } from '../utils/http.js';
@@ -40,7 +42,8 @@ const createAIRequest = (model, contents, config) => {
 const handleAIResponse = async (aiRequest, timeout) => {
   const response = await withTimeout(aiRequest, timeout);
   log(response, 'AI chat generation response:');
-  return response?.text || null;
+  const plainText = removeMarkdown(response?.text || '');
+  return plainText || null;
 };
 
 // Function to generate AI content
