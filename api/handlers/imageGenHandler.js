@@ -15,7 +15,7 @@ export const handleAIImageGen = async (ctx) => {
   }
 
   try {
-    await ctx.sendChatAction('typing');
+    await ctx.sendChatAction('upload_photo');
 
     const response = await generateAIImage(prompt)
 

@@ -15,7 +15,7 @@ export const handleAIImageEdit = async (ctx) => {
   }
 
   try {
-    await ctx.sendChatAction('typing');
+    await ctx.sendChatAction('upload_photo');
 
     const fileUrl = await getLargestPhotoUrl(ctx, imgObject.photos);
     const response = await generateAIImageEditResponse(fileUrl, imgObject.prompt);
