@@ -36,3 +36,6 @@ export const getMessage = (ctx) => {
 
   return '';
 };
+
+// Helper to check if message should be handled as /ai in private chat
+export const isPrivateAiMessage = (ctx) => ctx.chat?.type === 'private' && clearText(ctx.message?.text, ctx?.me)

@@ -1,6 +1,6 @@
 import 'dotenv/config.js';
-import { Telegraf } from 'telegraf'
-import { message } from 'telegraf/filters'
+import { Telegraf } from 'telegraf';
+import { message } from 'telegraf/filters';
 
 import { connectToDb, insertMessageToDb } from './services/dbService.js';
 import { handleAIMessage } from './handlers/aiHandler.js';
@@ -10,21 +10,25 @@ import { handleAIImageGen } from './handlers/imageGenHandler.js';
 import { handleAIImageEdit } from './handlers/imageEditHandler.js';
 import { imageHandlerRouter } from './handlers/imageHandlerRouter.js';
 import { handleAITextToSpeech } from './handlers/ttsHandler.js';
+import { isPrivateAiMessage } from './utils/text.js';
 import { log } from './utils/logger.js';
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
-bot.command('ai', async (ctx) => { await handleAIMessage(ctx) });
-bot.command('sum', async (ctx) => { await handleAISummary(ctx) });
-bot.command('img', async (ctx) => { await handleAIImageRecognition(ctx) });
-bot.command('gen', async (ctx) => { await handleAIImageGen(ctx) });
-bot.command('edit', async (ctx) => { await handleAIImageEdit(ctx) });
-bot.command('voice', async (ctx) => { await handleAITextToSpeech(ctx) });
-bot.on(message('photo'), async (ctx) => { await imageHandlerRouter(ctx) });
+// Commands
+bot.command('ai', handleAIMessage);
+bot.command('sum', handleAISummary);
+bot.command('img', handleAIImageRecognition);
+bot.command('gen', handleAIImageGen);
+bot.command('edit', handleAIImageEdit);
+bot.command('voice', handleAITextToSpeech);
 
+// Photo handler
+bot.on(message('photo'), imageHandlerRouter);
+
+// Handle direct messages as /ai (but not commands)
 bot.on('message', async (ctx) => {
-  // If in private chat and not a command, handle as /ai
-  if (ctx.chat?.type === 'private') { await handleAIMessage(ctx); }
+  if (isPrivateAiMessage(ctx)) await handleAIMessage(ctx);
 });
 
 export default async (req, res) => {
@@ -35,11 +39,9 @@ export default async (req, res) => {
   try {
     await connectToDb();
     await Promise.all([bot.handleUpdate(req.body), insertMessageToDb(req.body)]);
-
     res.status(200).send('OK');
   } catch (err) {
     console.error('Bot handling failed:', err);
-
     res.status(500).send('Error processing bot handling.');
   }
 };
