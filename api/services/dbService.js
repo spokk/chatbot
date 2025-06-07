@@ -94,9 +94,11 @@ export const insertMessageToDb = async (body) => {
 
 // Helper function to extract message data
 export const extractMessageData = (body) => {
+  if (!body?.message) return null;
+
   const text = getMessage(body);
-  const userName = body.message.from?.first_name || body.message.from?.username;
-  const chatId = body.message.chat?.id;
+  const userName = body.message?.from?.first_name || body.message?.from?.username;
+  const chatId = body.message?.chat?.id;
 
   if (!text || !userName || !chatId) return null;
 
