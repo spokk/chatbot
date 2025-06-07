@@ -12,7 +12,7 @@ export const handleAIImageRecognition = async (ctx) => {
 
   if (!imgObject) {
     console.error('No image to process.');
-    await ctx.reply('⚠️ No image or prompt found. Please send an image with a caption or reply to an image with a prompt.', { reply_to_message_id: ctx.message.message_id });
+    await ctx.reply('⚠️ No image or prompt found. Please send an image with a caption or reply to an image with a prompt.', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
     return;
   }
 
@@ -23,16 +23,16 @@ export const handleAIImageRecognition = async (ctx) => {
     const response = await generateAIImageResponse(fileUrl, imgObject.prompt);
 
     if (!response) {
-      await ctx.reply('⚠️ AI returned nothing. Try again...', { reply_to_message_id: ctx.message.message_id });
+      await ctx.reply('⚠️ AI returned nothing. Try again...', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
       return;
     }
 
     await Promise.all([
-      ctx.reply(`${response}`, { reply_to_message_id: ctx.message.message_id }),
+      ctx.reply(`${response}`, ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id })),
       insertAIResponseToDb(ctx, response)
     ]);
   } catch (err) {
     console.error('Error processing image request:', err);
-    await ctx.reply('⚠️ Error while processing the image request.', { reply_to_message_id: ctx.message.message_id });
+    await ctx.reply('⚠️ Error while processing the image request.', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
   }
 };

@@ -33,7 +33,7 @@ export const handleAITextToSpeech = async (ctx) => {
   if (!prompt) {
     await ctx.reply(
       '⚠️ No input provided. Please send a prompt for voice generation.',
-      { reply_to_message_id: ctx.message.message_id }
+      ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id })
     );
     return;
   }
@@ -48,7 +48,7 @@ export const handleAITextToSpeech = async (ctx) => {
     const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 
     if (!data) {
-      await ctx.reply('⚠️ No voice response from AI. Try again...', { reply_to_message_id: ctx.message.message_id });
+      await ctx.reply('⚠️ No voice response from AI. Try again...', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
       return;
     }
 
@@ -56,7 +56,7 @@ export const handleAITextToSpeech = async (ctx) => {
       const audioBuffer = Buffer.from(data, 'base64');
 
       if (!audioBuffer) {
-        await ctx.reply('⚠️ No audio buffer created. Try again...', { reply_to_message_id: ctx.message.message_id });
+        await ctx.reply('⚠️ No audio buffer created. Try again...', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
         return;
       }
 
@@ -66,7 +66,7 @@ export const handleAITextToSpeech = async (ctx) => {
       await ctx.replyWithAudio({ source: wavBuffer }, { title: prompt, performer: 'AI Voice' });
     } catch (err) {
       console.error('Error converting audio buffer to WAV:', err);
-      await ctx.reply('⚠️ Error while converting audio data. Try again...', { reply_to_message_id: ctx.message.message_id });
+      await ctx.reply('⚠️ Error while converting audio data. Try again...', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
     }
 
   } catch (error) {
@@ -76,11 +76,11 @@ export const handleAITextToSpeech = async (ctx) => {
     if (error?.response?.status === 429 || error?.message?.includes('429')) {
       await ctx.reply(
         '🚫 Rate limit exceeded: You have reached the maximum number of requests. Please try again tomorrow.',
-        { reply_to_message_id: ctx.message.message_id }
+        ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id })
       );
       return;
     }
 
-    await ctx.reply('⚠️ Error while processing the voice generation request. Try again...', { reply_to_message_id: ctx.message.message_id });
+    await ctx.reply('⚠️ Error while processing the voice generation request. Try again...', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
   }
 }

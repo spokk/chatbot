@@ -13,19 +13,19 @@ export const handleAISummary = async (ctx) => {
     }));
 
     if (!decryptedMessages || decryptedMessages.length === 0) {
-      await ctx.reply('⚠️ No recent messages found to summarize. Please send some messages first.', { reply_to_message_id: ctx.message.message_id });
+      await ctx.reply('⚠️ No recent messages found to summarize. Please send some messages first.', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
       return;
     }
 
     const summary = await generateAISummary(JSON.stringify(decryptedMessages));
     if (!summary) {
-      await ctx.reply('⚠️ AI returned no summary.', { reply_to_message_id: ctx.message.message_id });
+      await ctx.reply('⚠️ AI returned no summary.', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
       return;
     }
 
-    await ctx.reply(summary, { reply_to_message_id: ctx.message.message_id });
+    await ctx.reply(summary, ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
   } catch (err) {
     console.error('Summary request error:', err);
-    await ctx.reply('⚠️ Error while processing summary request. Try again...', { reply_to_message_id: ctx.message.message_id });
+    await ctx.reply('⚠️ Error while processing summary request. Try again...', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
   }
 };
