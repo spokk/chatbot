@@ -1,4 +1,5 @@
 import { generateAIImageResponse } from '../services/aiService.js';
+import { insertAIResponseToDb } from '../services/dbService.js';
 
 import { getImageToProcess, getLargestPhotoUrl } from '../utils/image.js';
 import { log } from '../utils/logger.js';
@@ -26,7 +27,10 @@ export const handleAIImageRecognition = async (ctx) => {
       return;
     }
 
-    await ctx.reply(`${response}`, { reply_to_message_id: ctx.message.message_id });
+    await Promise.all([
+      ctx.reply(`${response}`, { reply_to_message_id: ctx.message.message_id }),
+      insertAIResponseToDb(ctx, response)
+    ]);
   } catch (err) {
     console.error('Error processing image request:', err);
     await ctx.reply('⚠️ Error while processing the image request.', { reply_to_message_id: ctx.message.message_id });

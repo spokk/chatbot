@@ -1,12 +1,14 @@
 import { MongoClient } from 'mongodb';
 
 import { encryptText, decryptText } from '../utils/crypto.js';
-import { clearText } from '../utils/text.js';
+import { getMessage } from '../utils/text.js';
+import { log } from '../utils/logger.js';
 
 let clientPromise; // Use a promise to avoid race conditions
 
 const DB_NAME = 'tg_db';
 const COLLECTION_NAME = 'messages';
+const BOT_NAME = "AI_Chat_bot"
 
 // Singleton connection using a promise
 export const connectToDb = async () => {
@@ -41,11 +43,11 @@ export const getMessagesFromDb = async (chatId, limit = 50) => {
   try {
     const messages = await collection
       .find({ chatId })
-      .sort({ _id: -1 })
+      .sort({ _id: -1 }) // Get latest messages first
       .limit(limit)
       .toArray();
 
-    return messages;
+    return messages.reverse(); // Reverse to get chronological order (oldest to newest)
   } catch (error) {
     console.error(`Error fetching messages for chatId ${chatId}:`, error);
     throw new Error('Failed to fetch messages from DB.');
@@ -65,7 +67,7 @@ export const insertAIResponseToDb = async (ctx, response) => {
   await collection.insertOne({
     chatId: ctx.message.chat.id,
     message: encryptedText,
-    userName: "AI_Chat_bot",
+    userName: BOT_NAME,
     createdAt: new Date(),
   });
 }
@@ -79,12 +81,8 @@ export const insertMessageToDb = async (body) => {
 
   const { chatId, text, userName } = messageData;
 
-  const clearedText = clearText(text)
-
-  if (!clearedText) return;
-
   // Encrypt the message text before inserting
-  const encryptedText = encryptText(clearedText);
+  const encryptedText = encryptText(text);
 
   await client.db(DB_NAME).collection(COLLECTION_NAME).insertOne({
     chatId,
@@ -96,15 +94,15 @@ export const insertMessageToDb = async (body) => {
 
 // Helper function to extract message data
 export const extractMessageData = (body) => {
-  const message = body?.message || body?.edited_message;
+  const text = getMessage(body);
+  const userName = body.message.from?.first_name || body.message.from?.username;
+  const chatId = body.message.chat?.id;
 
-  if (!message || !message.chat?.id || !message.text) return null;
-
-  const userName = message.from?.first_name || message.from?.username;
+  if (!text || !userName || !chatId) return null;
 
   return {
-    chatId: message.chat.id,
-    text: message.text,
+    chatId,
+    text,
     userName,
   };
 };
@@ -120,7 +118,7 @@ export const buildAIHistory = async (ctx) => {
         message: decryptText(message.message),
       };
 
-      if (decryptedMessage.userName === "AI_Chat_bot") {
+      if (decryptedMessage.userName === BOT_NAME) {
         acc.model.push({ text: decryptedMessage.message });
       } else {
         acc.user.push({ text: decryptedMessage.message });
@@ -137,7 +135,7 @@ export const buildAIHistory = async (ctx) => {
   }
 
   // Build and return the history
-  return [
+  const history = [
     {
       role: 'user',
       parts: user,
@@ -147,4 +145,8 @@ export const buildAIHistory = async (ctx) => {
       parts: model.length === 0 ? [{ text: "Good to know." }] : model,
     },
   ];
+
+  log(history, `Built AI history for chatId ${ctx.message.chat.id}:`);
+
+  return history
 };
