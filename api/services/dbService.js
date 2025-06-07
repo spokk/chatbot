@@ -108,7 +108,7 @@ export const extractMessageData = (body) => {
 };
 
 export const buildAIHistory = async (ctx) => {
-  const messages = await getMessagesFromDb(ctx.message.chat.id, 15);
+  const messages = await getMessagesFromDb(ctx.message.chat.id, 18);
 
   // Decrypt messages and categorize them into user and model roles
   const { user, model } = messages.reduce(
