@@ -12,7 +12,7 @@ const sendResponseInChunks = async (ctx, response) => {
 
     try {
       if (i === 0) {
-        await ctx.reply(chunk, ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
+        await ctx.reply(chunk, { reply_to_message_id: ctx.message.message_id });
       } else {
         await ctx.reply(chunk);
       }
@@ -27,7 +27,7 @@ export const handleAIMessage = async (ctx) => {
   const prompt = getMessage(ctx);
 
   if (!prompt) {
-    await ctx.reply('⚠️ No input provided. Please send a message for AI processing.', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
+    await ctx.reply('⚠️ No input provided. Please send a message for AI processing.', { reply_to_message_id: ctx.message.message_id });
     return;
   }
 
@@ -37,7 +37,7 @@ export const handleAIMessage = async (ctx) => {
     const response = await generateAIResponse(prompt, history);
 
     if (!response) {
-      await ctx.reply('⚠️ No response from AI. Try again...', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
+      await ctx.reply('⚠️ No response from AI. Try again...', { reply_to_message_id: ctx.message.message_id });
       return;
     }
 
@@ -47,7 +47,7 @@ export const handleAIMessage = async (ctx) => {
     ]);
   } catch (err) {
     console.error('AI request error:', err);
-    await ctx.reply('⚠️ Error while communicating with AI. Try again...', ...(ctx.message?.message_id && { reply_to_message_id: ctx.message.message_id }));
+    await ctx.reply('⚠️ Error while communicating with AI. Try again...', { reply_to_message_id: ctx.message.message_id });
   }
 };
 
