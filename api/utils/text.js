@@ -28,6 +28,9 @@ export const getMessage = (ctx) => {
   const caption = clearText(ctx.message?.caption, botUsername)
   if (caption) return caption;
 
+  const replyQuote = clearText(ctx?.message?.quote?.text, botUsername)
+  if (replyQuote) return replyQuote;
+
   const replyMessage = clearText(ctx.message?.reply_to_message?.text, botUsername)
   if (replyMessage) return replyMessage;
 
