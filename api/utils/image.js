@@ -1,5 +1,3 @@
-import { getMessage } from '../utils/text.js';
-
 // Helper function to check if a command matches
 export const isCommand = (ctx, command) => {
   const text = ctx.message?.caption || ctx.message?.text || '';
@@ -7,28 +5,20 @@ export const isCommand = (ctx, command) => {
 };
 
 // Check if the message is an image generation command
-export const getIsImgCommand = (ctx) => isCommand(ctx, '/img');
+export const getIsAiCommand = (ctx) => isCommand(ctx, '/ai');
 
 // Check if the message is an image edit command
 export const getIsEditCommand = (ctx) => isCommand(ctx, '/edit');
 
-export const getImageToProcess = (ctx) => {
-  const prompt = getMessage(ctx);
+export const getImagesToProcess = (ctx) => {
   const photos = ctx.message?.photo;
-
-  if (photos && prompt) {
-    return { photos, prompt };
-  }
+  if (photos) return photos
 
   const replyPhotos = ctx.message?.reply_to_message?.photo;
+  if (replyPhotos) return replyPhotos
+
   const replySticker = ctx.message?.reply_to_message?.sticker?.thumbnail;
-  const replyPrompt = getMessage(ctx);
-
-  if (replyPrompt) {
-    if (replyPhotos) return { photos: replyPhotos, prompt: replyPrompt };
-
-    if (replySticker) return { photos: [replySticker], prompt: replyPrompt };
-  }
+  if (replySticker) return [replySticker]
 
   return null
 };

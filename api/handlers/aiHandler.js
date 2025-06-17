@@ -1,7 +1,8 @@
-import { generateAIResponse } from '../services/aiService.js';
+import { generateAIResponse, generateAIImageResponse } from '../services/aiService.js';
 import { insertAIResponseToDb, buildAIHistory } from '../services/dbService.js';
 
 import { getMessage } from '../utils/text.js';
+import { getImagesToProcess, getLargestPhotoUrl } from '../utils/image.js';
 
 // Helper function to send the response in chunks
 const sendResponseInChunks = async (ctx, response) => {
@@ -25,16 +26,25 @@ const sendResponseInChunks = async (ctx, response) => {
 
 export const handleAIMessage = async (ctx) => {
   const prompt = getMessage(ctx);
+  const images = getImagesToProcess(ctx);
 
-  if (!prompt) {
-    await ctx.reply('⚠️ No input provided. Please send a message for AI processing.', { reply_to_message_id: ctx.message.message_id });
+  if (!prompt && !images) {
+    await ctx.reply('⚠️ No input provided. Please send a message or an image for AI processing.', { reply_to_message_id: ctx.message.message_id });
     return;
   }
 
   try {
+    let response
+
     await ctx.sendChatAction('typing');
-    const history = await buildAIHistory(ctx);
-    const response = await generateAIResponse(prompt, history);
+
+    if (images) {
+      const fileUrl = await getLargestPhotoUrl(ctx, images);
+      response = await generateAIImageResponse(fileUrl, prompt);
+    } else {
+      const history = await buildAIHistory(ctx);
+      response = await generateAIResponse(prompt, history);
+    }
 
     if (!response) {
       await ctx.reply('⚠️ No response from AI. Try again...', { reply_to_message_id: ctx.message.message_id });

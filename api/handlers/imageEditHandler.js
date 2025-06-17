@@ -1,24 +1,22 @@
 import { generateAIImageEditResponse } from '../services/aiService.js';
 
-import { getImageToProcess, getLargestPhotoUrl, processAIImageResponse } from '../utils/image.js';
-import { log } from '../utils/logger.js';
+import { getImagesToProcess, getLargestPhotoUrl, processAIImageResponse } from '../utils/image.js';
+import { getMessage } from '../utils/text.js';
 
 export const handleAIImageEdit = async (ctx) => {
-  log(ctx.message?.text || ctx.message?.caption, 'Received image edit request:');
+  const prompt = getMessage(ctx);
+  const images = getImagesToProcess(ctx);
 
-  const imgObject = getImageToProcess(ctx);
-
-  if (!imgObject) {
-    console.error('No image to process.');
-    await ctx.reply('⚠️ No image to process. Please send an image with a caption.', { reply_to_message_id: ctx.message.message_id });
+  if (!prompt || !images) {
+    await ctx.reply('⚠️ No input provided. Please send an image with a caption.', { reply_to_message_id: ctx.message.message_id });
     return;
   }
 
   try {
     await ctx.sendChatAction('upload_photo');
 
-    const fileUrl = await getLargestPhotoUrl(ctx, imgObject.photos);
-    const response = await generateAIImageEditResponse(fileUrl, imgObject.prompt);
+    const fileUrl = await getLargestPhotoUrl(ctx, images);
+    const response = await generateAIImageEditResponse(fileUrl, prompt);
 
     await processAIImageResponse(ctx, response);
   } catch (error) {

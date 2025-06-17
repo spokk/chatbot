@@ -1,6 +1,6 @@
-import { getIsEditCommand, getIsImgCommand } from '../utils/image.js';
+import { getIsEditCommand, getIsAiCommand } from '../utils/image.js';
 import { handleAIImageEdit } from './imageEditHandler.js';
-import { handleAIImageRecognition } from './imageRecognitionHandler.js';
+import { handleAIMessage } from './aiHandler.js';
 
 export const imageHandlerRouter = async (ctx) => {
   if (getIsEditCommand(ctx)) {
@@ -8,8 +8,8 @@ export const imageHandlerRouter = async (ctx) => {
     return
   }
 
-  if (getIsImgCommand(ctx)) {
-    await handleAIImageRecognition(ctx)
+  if (getIsAiCommand(ctx)) {
+    await handleAIMessage(ctx)
     return
   }
 }
