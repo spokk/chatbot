@@ -81,6 +81,7 @@ export const handleAITextToSpeech = async (ctx) => {
       return;
     }
 
-    await ctx.reply('⚠️ Error while processing the voice generation request. Try again...', { reply_to_message_id: ctx.message.message_id });
+    const errorMessage = err?.error?.message || '⚠️ Error while processing the voice generation request. Try again...';
+    await ctx.reply(errorMessage, { reply_to_message_id: ctx.message.message_id });
   }
 }

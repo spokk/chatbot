@@ -2,7 +2,7 @@ export const clearText = (text, botUsername = process.env.BOT_USERNAME) => {
   if (typeof text !== 'string') return '';
 
   // Define the commands to remove
-  const commands = ['/ai', '/sum', '/img', '/gen', '/edit', '/voice'];
+  const commands = ['/ai', '/sum', '/gen', '/edit', '/voice'];
 
   // Create an array of commands with the bot username
   const botSpecificCommands = commands.map((cmd) => `${cmd}@${botUsername}`);

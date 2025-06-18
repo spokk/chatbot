@@ -57,7 +57,8 @@ export const handleAIMessage = async (ctx) => {
     ]);
   } catch (err) {
     console.error('AI request error:', err);
-    await ctx.reply('⚠️ Error while communicating with AI. Try again...', { reply_to_message_id: ctx.message.message_id });
+    const errorMessage = err?.error?.message || '⚠️ Error while communicating with AI. Try again...';
+    await ctx.reply(errorMessage, { reply_to_message_id: ctx.message.message_id });
   }
 };
 
