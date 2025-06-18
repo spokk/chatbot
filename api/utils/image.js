@@ -35,7 +35,7 @@ export const getLargestPhotoUrl = async (ctx, photos) => {
 // Helper function to handle missing image data
 export const handleMissingImageData = async (ctx, response) => {
   console.error('AI generated no image: ', response);
-  const fallbackMessage = response.candidates[0]?.content?.parts[0]?.text || 'AI generated nothing. Try again...';
+  const fallbackMessage = 'AI generated no image. Try again...';
   await ctx.reply(`⚠️ ${fallbackMessage}`, { reply_to_message_id: ctx.message.message_id });
 };
 
@@ -44,12 +44,8 @@ export const processImagePart = async (ctx, part) => {
   if (part.inlineData) {
     const imageData = part.inlineData.data;
     const buffer = Buffer.from(imageData, 'base64');
-    const options = {
-      caption: `Here is your generated image, ${ctx.message.from?.first_name || ctx.message.from?.username}!`,
-      reply_to_message_id: ctx.message.message_id
-    };
 
-    await ctx.replyWithPhoto({ source: buffer }, { ...options });
+    await ctx.replyWithPhoto({ source: buffer }, { reply_to_message_id: ctx.message.message_id });
 
     return true
   }
