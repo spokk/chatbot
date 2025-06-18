@@ -9,15 +9,15 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 // Constants
 const MAX_TIME_TO_GENERATE = 55000; // 55 seconds
-const BASE_INSTRUCTIONS = 'Do not hallucinate. Do not make up facts. Make short and concise answers.';
+const BASE_INSTRUCTIONS = 'Do not hallucinate. Do not make up facts. Make short and concise answer.';
 const SAFETY_SETTINGS = [
-  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
-  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
-  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
-  { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_ONLY_HIGH" },
+  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" },
 ];
-const BASE_MODEL = "gemini-2.5-flash-preview-05-20"
+const BASE_MODEL = "gemini-2.5-flash"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
 const VOICE_MODEL = "gemini-2.5-flash-preview-tts"
 

@@ -24,7 +24,7 @@ bot.command('voice', handleAITextToSpeech);
 // Photo handler
 bot.on(message('photo'), imageHandlerRouter);
 
-// Handle direct messages as /ai (but not commands)
+// Handle direct messages as /ai command
 bot.on('message', async (ctx) => {
   if (isPrivateAiMessage(ctx)) await handleAIMessage(ctx);
 });
