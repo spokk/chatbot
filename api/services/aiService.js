@@ -47,7 +47,7 @@ const handleAIResponse = async (aiRequest, timeout) => {
 };
 
 // Function to generate AI content
-const generateAIContent = async (contents, systemInstruction) => {
+const generateAIContent = async (contents, systemInstruction = null) => {
   log(contents, 'AI content generation input:');
   const aiRequest = createAIRequest(BASE_MODEL,
     contents,
@@ -115,7 +115,7 @@ export const generateAIVoice = async (contents) => {
 // Function to generate AI image response
 export const generateAIImageResponse = async (imageURL, caption) => {
   const contents = await prepareAIImageContent(imageURL, caption);
-  return generateAIContent(contents, BASE_INSTRUCTIONS);
+  return generateAIContent(contents);
 };
 
 // Function to generate AI image edit response
