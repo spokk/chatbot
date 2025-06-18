@@ -57,7 +57,7 @@ export const processImagePart = async (ctx, part) => {
 export const processAIImageResponse = async (ctx, response) => {
   let repliedWithImg = false;
 
-  const parts = response.candidates[0]?.content?.parts || [];
+  const parts = response?.candidates?.[0]?.content?.parts || [];
 
   for (const part of parts) {
     repliedWithImg = await processImagePart(ctx, part);
