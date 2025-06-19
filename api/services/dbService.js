@@ -48,8 +48,8 @@ export const getMessagesFromDb = async (chatId, limit = 50) => {
       .toArray();
 
     return messages.reverse(); // Reverse to get chronological order (oldest to newest)
-  } catch (error) {
-    console.error(`Error fetching messages for chatId ${chatId}:`, error);
+  } catch (err) {
+    console.error(`Error fetching messages for chatId ${chatId}:`, err);
     throw new Error('Failed to fetch messages from DB.');
   }
 }

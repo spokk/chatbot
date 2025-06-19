@@ -3,7 +3,8 @@ import { generateAIImage } from '../services/aiService.js';
 import { getMessage } from '../utils/text.js';
 import { log } from '../utils/logger.js';
 
-const MAX_ATTEMPTS = 8;
+const MAX_ATTEMPTS = 5;
+const RETRY_DELAY_MS = 500;
 
 export const handleAIImageGen = async (ctx) => {
   const prompt = getMessage(ctx)
@@ -37,11 +38,13 @@ export const handleAIImageGen = async (ctx) => {
         );
 
         imageSent = true;
+      } else if (attempt < MAX_ATTEMPTS) {
+        await new Promise((res) => setTimeout(res, RETRY_DELAY_MS));
       }
     }
 
     if (!imageSent) {
-      log(response, 'AI generated no image: ');
+      log(lastResponse, 'AI generated no image: ');
       const fallbackMessage = 'AI generated no image. Try again...';
       await ctx.reply(`⚠️ ${fallbackMessage}`, { reply_to_message_id: ctx.message.message_id });
     }
