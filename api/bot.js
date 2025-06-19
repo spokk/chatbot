@@ -5,8 +5,7 @@ import { message } from 'telegraf/filters';
 import { connectToDb, insertMessageToDb } from './services/dbService.js';
 import { handleAIMessage } from './handlers/aiHandler.js';
 import { handleAISummary } from './handlers/summaryHandler.js';
-import { handleAIImageGen } from './handlers/imageGenHandler.js';
-import { handleAIImageEdit } from './handlers/imageEditHandler.js';
+import { handleAIImage } from './handlers/aiImageHandler.js';
 import { imageHandlerRouter } from './handlers/imageHandlerRouter.js';
 import { handleAITextToSpeech } from './handlers/ttsHandler.js';
 import { isPrivateAiMessage } from './utils/text.js';
@@ -17,8 +16,7 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 // Commands
 bot.command('ai', handleAIMessage);
 bot.command('sum', handleAISummary);
-bot.command('gen', handleAIImageGen);
-bot.command('edit', handleAIImageEdit);
+bot.command('gen', handleAIImage);
 bot.command('voice', handleAITextToSpeech);
 
 // Photo handler

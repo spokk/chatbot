@@ -1,10 +1,10 @@
-import { getIsEditCommand, getIsAiCommand } from '../utils/image.js';
-import { handleAIImageEdit } from './imageEditHandler.js';
+import { getIsGenCommand, getIsAiCommand } from '../utils/image.js';
+import { handleAIImage } from './aiImageHandler.js';
 import { handleAIMessage } from './aiHandler.js';
 
 export const imageHandlerRouter = async (ctx) => {
-  if (getIsEditCommand(ctx)) {
-    await handleAIImageEdit(ctx)
+  if (getIsGenCommand(ctx)) {
+    await handleAIImage(ctx)
     return
   }
 
