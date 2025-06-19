@@ -87,7 +87,6 @@ const prepareAIImageContent = async (imageURL, caption) => {
 
 // Function to generate AI image
 export const generateAIImage = async (contents) => {
-  console.log('AI image generation input:', contents);
   const aiRequest = createAIRequest(IMG_MODEL, contents, {
     numberOfImages: 1,
     responseModalities: [Modality.TEXT, Modality.IMAGE],
