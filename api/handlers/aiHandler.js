@@ -40,7 +40,7 @@ export const handleAIMessage = async (ctx) => {
 
     if (images) {
       const fileUrl = await getLargestPhotoUrl(ctx, images);
-      response = await getAIImageRecognitionResponse(fileUrl, prompt);
+      response = await getAIImageRecognitionResponse(prompt, fileUrl);
     } else {
       const history = await buildAIHistory(ctx);
       response = await getAIResponse(prompt, history);

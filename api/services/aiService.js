@@ -67,7 +67,7 @@ const generateAIChat = async (contents, history, systemInstruction) => {
 };
 
 // Helper function to prepare AI image content
-const prepareAIImageContent = async (imageURL, caption) => {
+const prepareAIImageContent = async (caption, imageURL) => {
   const imageBuffer = await downloadImageAsBuffer(imageURL);
   const base64ImageData = Buffer.from(imageBuffer).toString('base64');
   return [
@@ -102,15 +102,15 @@ export const generateAIVoice = async (contents) => {
 };
 
 // Function to generate AI image response
-export const getAIImageRecognitionResponse = async (imageURL, caption) => {
-  const contents = await prepareAIImageContent(imageURL, caption);
+export const getAIImageRecognitionResponse = async (caption, imageURL) => {
+  const contents = await prepareAIImageContent(caption, imageURL);
   return generateAIContent(contents);
 };
 
 // Function to generate AI image edit response
 export const getAIImageGenerationResponse = async (caption, imageURL) => {
   if (imageURL) {
-    const contents = await prepareAIImageContent(imageURL, caption);
+    const contents = await prepareAIImageContent(caption, imageURL);
     return generateAIImage(contents);
   }
 
