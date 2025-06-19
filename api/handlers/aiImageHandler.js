@@ -1,11 +1,26 @@
 import { generateAIImageGenerationResponse } from '../services/aiService.js';
-
 import { getImagesToProcess, getLargestPhotoUrl } from '../utils/image.js';
 import { getMessage } from '../utils/text.js';
 import { log } from '../utils/logger.js';
 
 const MAX_ATTEMPTS = 5;
 const RETRY_DELAY_MS = 500;
+
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+const sendImageFromResponse = async (ctx, response) => {
+  const parts = response?.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find((part) => part?.inlineData?.data);
+  if (imagePart) {
+    const buffer = Buffer.from(imagePart.inlineData.data, 'base64');
+    await ctx.replyWithPhoto(
+      { source: buffer },
+      { reply_to_message_id: ctx.message.message_id }
+    );
+    return true;
+  }
+  return false;
+};
 
 export const handleAIImage = async (ctx) => {
   const prompt = getMessage(ctx);
@@ -25,27 +40,16 @@ export const handleAIImage = async (ctx) => {
     let imageSent = false;
     let lastResponse = null;
 
-    if (images) fileUrl = await getLargestPhotoUrl(ctx, images)
+    if (images) fileUrl = await getLargestPhotoUrl(ctx, images);
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !imageSent; attempt++) {
       console.log(`Attempt ${attempt} to generate image...`);
 
-      lastResponse = await generateAIImageGenerationResponse(prompt, fileUrl)
+      lastResponse = await generateAIImageGenerationResponse(prompt, fileUrl);
+      imageSent = await sendImageFromResponse(ctx, lastResponse);
 
-      const parts = lastResponse?.candidates?.[0]?.content?.parts || [];
-      const imagePart = parts.find((part) => part?.inlineData?.data);
-
-      if (imagePart) {
-        const buffer = Buffer.from(imagePart.inlineData.data, 'base64');
-
-        await ctx.replyWithPhoto(
-          { source: buffer },
-          { reply_to_message_id: ctx.message.message_id }
-        );
-
-        imageSent = true;
-      } else if (attempt < MAX_ATTEMPTS) {
-        await new Promise((res) => setTimeout(res, RETRY_DELAY_MS));
+      if (!imageSent && attempt < MAX_ATTEMPTS) {
+        await delay(RETRY_DELAY_MS);
       }
     }
 
