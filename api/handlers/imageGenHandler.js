@@ -1,8 +1,9 @@
 import { generateAIImage } from '../services/aiService.js';
 
-import { processAIImageResponse } from '../utils/image.js';
 import { getMessage } from '../utils/text.js';
 import { log } from '../utils/logger.js';
+
+const MAX_ATTEMPTS = 8;
 
 export const handleAIImageGen = async (ctx) => {
   const prompt = getMessage(ctx)
@@ -17,11 +18,36 @@ export const handleAIImageGen = async (ctx) => {
   try {
     await ctx.sendChatAction('upload_photo');
 
-    const response = await generateAIImage(prompt)
+    let imageSent = false;
+    let lastResponse = null;
 
-    await processAIImageResponse(ctx, response);
-  } catch (error) {
-    console.error('Error processing image request:', error);
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS && !imageSent; attempt++) {
+      console.log(`Attempt ${attempt} to generate image...`);
+      lastResponse = await generateAIImage(prompt);
+
+      const parts = lastResponse?.candidates?.[0]?.content?.parts || [];
+      const imagePart = parts.find((part) => part?.inlineData?.data);
+
+      if (imagePart) {
+        const buffer = Buffer.from(imagePart.inlineData.data, 'base64');
+
+        await ctx.replyWithPhoto(
+          { source: buffer },
+          { reply_to_message_id: ctx.message.message_id }
+        );
+
+        imageSent = true;
+      }
+    }
+
+    if (!imageSent) {
+      log(response, 'AI generated no image: ');
+      const fallbackMessage = 'AI generated no image. Try again...';
+      await ctx.reply(`⚠️ ${fallbackMessage}`, { reply_to_message_id: ctx.message.message_id });
+    }
+
+  } catch (err) {
+    console.error('Error processing image request:', err);
     const errorMessage = err?.error?.message || '⚠️ Error while processing the image generation request. Try again...';
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message.message_id });
   }

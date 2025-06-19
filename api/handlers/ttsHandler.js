@@ -69,11 +69,11 @@ export const handleAITextToSpeech = async (ctx) => {
       await ctx.reply('⚠️ Error while converting audio data. Try again...', { reply_to_message_id: ctx.message.message_id });
     }
 
-  } catch (error) {
-    console.error('Error processing voice request:', error);
+  } catch (err) {
+    console.error('Error processing voice request:', err);
 
     // Handle 429 Too Many Requests
-    if (error?.response?.status === 429 || error?.message?.includes('429')) {
+    if (err?.response?.status === 429 || err?.message?.includes('429')) {
       await ctx.reply(
         '🚫 Rate limit exceeded: You have reached the maximum number of requests. Please try again tomorrow.',
         { reply_to_message_id: ctx.message.message_id }

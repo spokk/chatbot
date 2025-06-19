@@ -19,8 +19,8 @@ export const handleAIImageEdit = async (ctx) => {
     const response = await generateAIImageEditResponse(fileUrl, prompt);
 
     await processAIImageResponse(ctx, response);
-  } catch (error) {
-    console.error('Error processing image request:', error);
+  } catch (err) {
+    console.error('Error processing image request:', err);
     const errorMessage = err?.error?.message || '⚠️ Error while processing the image generation request. Try again...';
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message.message_id });
   }

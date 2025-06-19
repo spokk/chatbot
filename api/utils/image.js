@@ -39,31 +39,20 @@ export const handleMissingImageData = async (ctx, response) => {
   await ctx.reply(`⚠️ ${fallbackMessage}`, { reply_to_message_id: ctx.message.message_id });
 };
 
-// Helper function to process a single image part
-export const processImagePart = async (ctx, part) => {
-  if (part.inlineData) {
-    const imageData = part.inlineData.data;
-    const buffer = Buffer.from(imageData, 'base64');
-
-    await ctx.replyWithPhoto({ source: buffer }, { reply_to_message_id: ctx.message.message_id });
-
-    return true
-  }
-
-  return false
-};
-
 // Main function to process AI image response
 export const processAIImageResponse = async (ctx, response) => {
-  let repliedWithImg = false;
-
   const parts = response?.candidates?.[0]?.content?.parts || [];
 
   for (const part of parts) {
-    repliedWithImg = await processImagePart(ctx, part);
+    if (part?.inlineData) {
+      const imageData = part.inlineData.data;
+      const buffer = Buffer.from(imageData, 'base64');
 
-    if (repliedWithImg) return;
+      await ctx.replyWithPhoto({ source: buffer }, { reply_to_message_id: ctx.message.message_id });
+
+      return
+    }
   }
 
-  if (!repliedWithImg) await handleMissingImageData(ctx, response);
+  await handleMissingImageData(ctx, response);
 };
