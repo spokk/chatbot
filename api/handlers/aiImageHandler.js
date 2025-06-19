@@ -1,4 +1,4 @@
-import { generateAIImageGenerationResponse } from '../services/aiService.js';
+import { getAIImageGenerationResponse } from '../services/aiService.js';
 import { getImagesToProcess, getLargestPhotoUrl } from '../utils/image.js';
 import { getMessage } from '../utils/text.js';
 import { log } from '../utils/logger.js';
@@ -45,7 +45,7 @@ export const handleAIImage = async (ctx) => {
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !imageSent; attempt++) {
       console.log(`Attempt ${attempt} to generate image...`);
 
-      lastResponse = await generateAIImageGenerationResponse(prompt, fileUrl);
+      lastResponse = await getAIImageGenerationResponse(prompt, fileUrl);
       imageSent = await sendImageFromResponse(ctx, lastResponse);
 
       if (!imageSent && attempt < MAX_ATTEMPTS) {

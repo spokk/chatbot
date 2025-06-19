@@ -1,4 +1,4 @@
-import { generateAIResponse, generateAIImageRecognitionResponse } from '../services/aiService.js';
+import { getAIResponse, getAIImageRecognitionResponse } from '../services/aiService.js';
 import { insertAIResponseToDb, buildAIHistory } from '../services/dbService.js';
 
 import { getMessage } from '../utils/text.js';
@@ -40,10 +40,10 @@ export const handleAIMessage = async (ctx) => {
 
     if (images) {
       const fileUrl = await getLargestPhotoUrl(ctx, images);
-      response = await generateAIImageRecognitionResponse(fileUrl, prompt);
+      response = await getAIImageRecognitionResponse(fileUrl, prompt);
     } else {
       const history = await buildAIHistory(ctx);
-      response = await generateAIResponse(prompt, history);
+      response = await getAIResponse(prompt, history);
     }
 
     if (!response) {

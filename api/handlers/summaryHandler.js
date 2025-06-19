@@ -1,5 +1,5 @@
 import { getMessagesFromDb } from '../services/dbService.js';
-import { generateAISummary } from '../services/aiService.js';
+import { getAISummary } from '../services/aiService.js';
 import { decryptText } from '../utils/crypto.js';
 
 export const handleAISummary = async (ctx) => {
@@ -17,7 +17,7 @@ export const handleAISummary = async (ctx) => {
       return;
     }
 
-    const summary = await generateAISummary(JSON.stringify(decryptedMessages));
+    const summary = await getAISummary(JSON.stringify(decryptedMessages));
     if (!summary) {
       await ctx.reply('⚠️ AI returned no summary.', { reply_to_message_id: ctx.message.message_id });
       return;

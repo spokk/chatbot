@@ -102,13 +102,13 @@ export const generateAIVoice = async (contents) => {
 };
 
 // Function to generate AI image response
-export const generateAIImageRecognitionResponse = async (imageURL, caption) => {
+export const getAIImageRecognitionResponse = async (imageURL, caption) => {
   const contents = await prepareAIImageContent(imageURL, caption);
   return generateAIContent(contents);
 };
 
 // Function to generate AI image edit response
-export const generateAIImageGenerationResponse = async (caption, imageURL) => {
+export const getAIImageGenerationResponse = async (caption, imageURL) => {
   if (imageURL) {
     const contents = await prepareAIImageContent(imageURL, caption);
     return generateAIImage(contents);
@@ -118,12 +118,12 @@ export const generateAIImageGenerationResponse = async (caption, imageURL) => {
 };
 
 // Function to generate AI response
-export const generateAIResponse = async (contents, history = []) => {
+export const getAIResponse = async (contents, history = []) => {
   return generateAIChat(contents, history, BASE_INSTRUCTIONS);
 };
 
 // Function to generate AI summary
-export const generateAISummary = async (contents) => {
+export const getAISummary = async (contents) => {
   const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation. Prefer answer in Ukrainian. ${BASE_INSTRUCTIONS}`;
   return generateAIContent(contents, systemInstruction);
 };
