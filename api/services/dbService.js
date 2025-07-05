@@ -9,6 +9,7 @@ let clientPromise; // Use a promise to avoid race conditions
 const DB_NAME = 'tg_db';
 const COLLECTION_NAME = 'messages';
 const BOT_NAME = "AI_Chat_bot"
+const USER_NAME = "User"
 
 // Singleton connection using a promise
 export const connectToDb = async () => {
@@ -79,7 +80,7 @@ export const insertMessageToDb = async (body) => {
 
   if (!messageData) return;
 
-  const { chatId, text, userName } = messageData;
+  const { chatId, text } = messageData;
 
   // Encrypt the message text before inserting
   const encryptedText = encryptText(text);
@@ -87,7 +88,7 @@ export const insertMessageToDb = async (body) => {
   await client.db(DB_NAME).collection(COLLECTION_NAME).insertOne({
     chatId,
     message: encryptedText,
-    userName,
+    userName: USER_NAME,
     createdAt: new Date(),
   });
 };
@@ -144,7 +145,7 @@ export const buildAIHistory = async (ctx) => {
     },
     {
       role: 'model',
-      parts: model.length === 0 ? [{ text: "Good to know." }] : model,
+      parts: model,
     },
   ];
 
