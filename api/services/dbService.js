@@ -111,45 +111,60 @@ export const extractMessageData = (body) => {
 };
 
 export const buildAIHistory = async (ctx) => {
-  const messages = await getMessagesFromDb(ctx.message.chat.id, 18);
+  const messages = await getMessagesFromDb(ctx.message.chat.id, 18, true);
+  if (!messages || messages.length === 0) return [];
 
-  // Decrypt messages and categorize them into user and model roles
-  const { user, model } = messages.reduce(
-    (acc, message) => {
-      const decryptedMessage = {
-        userName: message.userName,
-        message: decryptText(message.message),
-      };
+  const history = [];
+  let lastRole = null;
+  let currentTexts = [];
 
-      if (decryptedMessage.userName === BOT_NAME) {
-        acc.model.push({ text: decryptedMessage.message });
-      } else {
-        acc.user.push({ text: decryptedMessage.message });
+  const getRole = (userName) => userName === BOT_NAME ? "model" : "user";
+
+  const pushHistoryTurn = (role, texts) => {
+    if (texts.length > 0) {
+      history.push({
+        role,
+        parts: [{ text: texts.join('\n') }]
+      });
+    }
+  };
+
+  for (const message of messages) {
+    const decryptedMessage = {
+      userName: message.userName,
+      message: decryptText(message.message),
+    };
+
+    const role = getRole(decryptedMessage.userName);
+    const textWithUser = role === "user"
+      ? `${decryptedMessage.userName}: ${decryptedMessage.message}`
+      : decryptedMessage.message;
+
+    if (role === lastRole) {
+      currentTexts.push(textWithUser);
+    } else {
+      if (lastRole !== null) {
+        pushHistoryTurn(lastRole, currentTexts);
       }
-
-      return acc;
-    },
-    { user: [], model: [] } // Initial accumulator
-  );
-
-  // Return an empty array if no messages exist
-  if (user.length === 0 && model.length === 0) {
-    return [];
+      lastRole = role;
+      currentTexts = [textWithUser];
+    }
   }
 
-  // Build and return the history
-  const history = [
-    {
-      role: 'user',
-      parts: user,
-    },
-    {
-      role: 'model',
-      parts: model,
-    },
-  ];
+  // Push the last group if any
+  pushHistoryTurn(lastRole, currentTexts);
+
+  // If there is only user role and no model, add an empty model turn
+  const hasUser = history.some(h => h.role === "user");
+  const hasModel = history.some(h => h.role === "model");
+  if (hasUser && !hasModel) {
+    history.push({
+      role: "model",
+      parts: [{ text: "" }]
+    });
+  }
 
   log(history, `Built AI history for chatId ${ctx.message.chat.id}:`);
 
-  return history
+  return history;
 };
