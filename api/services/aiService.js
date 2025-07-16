@@ -14,6 +14,11 @@ const BASE_MODEL = "gemini-2.5-flash"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
 const VOICE_MODEL = "gemini-2.5-flash-preview-tts"
 
+// Grounding with Google Search
+const groundingTool = {
+  googleSearch: {},
+};
+
 // Helper function to handle timeouts
 const withTimeout = async (promise, timeoutMs) => {
   const timeout = new Promise((resolve) =>
@@ -60,6 +65,7 @@ const generateAIChat = async (contents, history, systemInstruction) => {
     config: {
       systemInstruction,
       temperature: 0.7,
+      tools: [groundingTool],
     },
   });
   const aiRequest = async (prompt) => chat.sendMessage({ message: prompt });
