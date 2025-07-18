@@ -51,7 +51,6 @@ const generateAIContent = async (contents, systemInstruction = null) => {
     contents,
     {
       systemInstruction,
-      temperature: 0.7,
     });
   return handleAIResponse(aiRequest, MAX_TIME_TO_GENERATE);
 };
@@ -64,7 +63,6 @@ const generateAIChat = async (contents, history, systemInstruction) => {
     history,
     config: {
       systemInstruction,
-      temperature: 0.7,
       tools: [groundingTool],
     },
   });
