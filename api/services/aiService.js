@@ -10,10 +10,10 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 // Constants
 const MAX_TIME_TO_GENERATE = 55000; // 55 seconds
 const BASE_INSTRUCTIONS = `
-Answer in the shortest form possible.
-Use only essential words and facts.
-Do not speculate or invent information.
-Do not add unnecessary details or explanations.
+Respond only with the minimal required words.
+Include only verified facts relevant to the question.
+No explanations, no filler, no extra context.
+No speculation or invented details.
 `;
 const BASE_MODEL = "gemini-2.5-flash"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
