@@ -1,4 +1,4 @@
-export const clearText = (text, botUsername = process.env.BOT_USERNAME) => {
+export const clearText = (text, botUsername) => {
   if (typeof text !== 'string') return '';
 
   // Define the commands to remove
@@ -19,23 +19,21 @@ export const clearText = (text, botUsername = process.env.BOT_USERNAME) => {
   return cleanedText.trim();
 }
 
-export const getMessage = (ctx) => {
-  const botUsername = ctx?.me || process.env.BOT_USERNAME
+export const getMessage = (ctx, botUsername) => {
+  const resolvedBotUsername = ctx?.me || botUsername;
 
-  const message = clearText(ctx.message?.text, botUsername)
-  if (message) return message;
+  const candidates = [
+    ctx?.message?.text,
+    ctx?.message?.caption,
+    ctx?.message?.quote?.text,
+    ctx?.message?.reply_to_message?.text,
+    ctx?.message?.reply_to_message?.caption,
+  ];
 
-  const caption = clearText(ctx.message?.caption, botUsername)
-  if (caption) return caption;
-
-  const replyQuote = clearText(ctx?.message?.quote?.text, botUsername)
-  if (replyQuote) return replyQuote;
-
-  const replyMessage = clearText(ctx.message?.reply_to_message?.text, botUsername)
-  if (replyMessage) return replyMessage;
-
-  const replyCaption = clearText(ctx.message?.reply_to_message?.caption, botUsername)
-  if (replyCaption) return replyCaption;
+  for (const candidate of candidates) {
+    const cleaned = clearText(candidate, resolvedBotUsername);
+    if (cleaned) return cleaned;
+  }
 
   return '';
 };

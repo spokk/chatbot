@@ -6,8 +6,8 @@ import { log } from '../utils/logger.js';
 
 let clientPromise; // Use a promise to avoid race conditions
 
-const DB_NAME = 'tg_db';
-const COLLECTION_NAME = 'messages';
+const DB_NAME = process.env.DB_NAME
+const COLLECTION_NAME = process.env.COLLECTION_NAME
 const BOT_NAME = "AI_Chat_bot"
 const USER_NAME = "User"
 
@@ -97,7 +97,7 @@ export const insertMessageToDb = async (body) => {
 export const extractMessageData = (body) => {
   if (!body?.message) return null;
 
-  const text = getMessage(body);
+  const text = getMessage(body, process.env.BOT_USERNAME);
   const userName = body.message?.from?.first_name || body.message?.from?.username;
   const chatId = body.message?.chat?.id;
 
