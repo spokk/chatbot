@@ -5,8 +5,7 @@ export const isCommand = (ctx, command) => {
 };
 
 // Check if the message is an image generation command
-export const getIsAiCommand = (ctx) => 
-  isCommand(ctx, '/ai') || isCommand(ctx, '/аі');
+export const getIsAiCommand = (ctx) => isCommand(ctx, '/ai');
 
 // Check if the message is an image edit command
 export const getIsGenCommand = (ctx) => isCommand(ctx, '/gen');

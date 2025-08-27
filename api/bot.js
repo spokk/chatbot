@@ -14,7 +14,7 @@ import { log } from './utils/logger.js';
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 // Commands
-bot.command(['ai', 'аі'], handleAIMessage);
+bot.command('ai', handleAIMessage);
 bot.command('sum', handleAISummary);
 bot.command('gen', handleAIImage);
 bot.command('voice', handleAITextToSpeech);
