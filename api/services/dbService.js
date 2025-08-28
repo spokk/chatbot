@@ -8,7 +8,7 @@ let clientPromise; // Use a promise to avoid race conditions
 
 const DB_NAME = process.env.DB_NAME
 const COLLECTION_NAME = process.env.COLLECTION_NAME
-const BOT_NAME = "AI_Chat_bot"
+const BOT_NAME = process.env.BOT_NAME
 const USER_NAME = "User"
 
 // Singleton connection using a promise
