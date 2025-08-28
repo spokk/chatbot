@@ -46,7 +46,7 @@ export const handleAIImage = async (ctx) => {
       console.log(`Attempt ${attempt} to generate image...`);
 
       if (imageURL) {
-        const contents = await prepareAIImageContent(caption, imageURL);
+        const contents = await prepareAIImageContent(prompt, imageURL);
         lastResponse = await generateAIImage(contents);
       } else {
         lastResponse = await generateAIImage(prompt);
