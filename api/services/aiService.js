@@ -23,16 +23,8 @@ const safetySettings = [
   { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" },
 ];
 
-const createAIModelRequest = (model, contents, config) => {
-  return ai.models.generateContent({
-    model,
-    contents,
-    config,
-  });
-};
-
-const createAIChat = (history = [], systemInstruction = BASE_INSTRUCTIONS) => {
-  return ai.chats.create({
+export const requestAIChat = async (contents, history, systemInstruction = BASE_INSTRUCTIONS) => {
+  const chat = ai.chats.create({
     model: BASE_MODEL,
     history,
     config: {
@@ -43,17 +35,14 @@ const createAIChat = (history = [], systemInstruction = BASE_INSTRUCTIONS) => {
       safetySettings
     },
   });
-}
 
-export const requestAIChat = async (contents, history) => {
-  const chat = createAIChat(history);
   const aiRequest = async (prompt) => chat.sendMessage({ message: prompt });
 
   return handleAIResponse(aiRequest(contents), MAX_TIME_TO_GENERATE);
 };
 
 export const generateAIContent = async (contents, systemInstruction = BASE_INSTRUCTIONS) => {
-  const aiRequest = createAIModelRequest(BASE_MODEL,
+  const aiRequest = ai.models.generateContent(BASE_MODEL,
     contents,
     {
       systemInstruction,
@@ -64,7 +53,7 @@ export const generateAIContent = async (contents, systemInstruction = BASE_INSTR
 };
 
 export const generateAIImage = async (contents) => {
-  const aiRequest = createAIModelRequest(IMG_MODEL, contents, {
+  const aiRequest = ai.models.generateContent(IMG_MODEL, contents, {
     numberOfImages: 1,
     responseModalities: [Modality.TEXT, Modality.IMAGE],
     safetySettings
@@ -73,7 +62,7 @@ export const generateAIImage = async (contents) => {
 };
 
 export const generateAIVoice = async (contents) => {
-  const aiRequest = createAIModelRequest(VOICE_MODEL,
+  const aiRequest = ai.models.generateContent(VOICE_MODEL,
     [{ parts: [{ text: contents }] }],
     {
       responseModalities: [Modality.AUDIO],
