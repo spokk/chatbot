@@ -42,29 +42,37 @@ export const requestAIChat = async (contents, history, systemInstruction = BASE_
 };
 
 export const generateAIContent = async (contents, systemInstruction = BASE_INSTRUCTIONS) => {
-  const aiRequest = ai.models.generateContent(BASE_MODEL,
+  const aiRequest = ai.models.generateContent({
+    model: BASE_MODEL,
     contents,
-    {
+    config: {
       systemInstruction,
       safetySettings
-    });
+    }
+  });
 
   return handleAIResponse(aiRequest, MAX_TIME_TO_GENERATE);
 };
 
 export const generateAIImage = async (contents) => {
-  const aiRequest = ai.models.generateContent(IMG_MODEL, contents, {
-    numberOfImages: 1,
-    responseModalities: [Modality.TEXT, Modality.IMAGE],
-    safetySettings
+  const aiRequest = ai.models.generateContent({
+    model: IMG_MODEL,
+    contents,
+    config: {
+      numberOfImages: 1,
+      responseModalities: [Modality.TEXT, Modality.IMAGE],
+      safetySettings
+    }
   });
+
   return withTimeout(aiRequest, MAX_TIME_TO_GENERATE);
 };
 
 export const generateAIVoice = async (contents) => {
-  const aiRequest = ai.models.generateContent(VOICE_MODEL,
-    [{ parts: [{ text: contents }] }],
-    {
+  const aiRequest = ai.models.generateContent({
+    model: VOICE_MODEL,
+    contents: [{ parts: [{ text: contents }] }],
+    config: {
       responseModalities: [Modality.AUDIO],
       speechConfig: {
         voiceConfig: {
@@ -72,7 +80,8 @@ export const generateAIVoice = async (contents) => {
         },
       },
       safetySettings
-    });
+    }
+  });
 
   return withTimeout(aiRequest, MAX_TIME_TO_GENERATE);;
 };

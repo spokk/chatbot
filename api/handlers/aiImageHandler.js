@@ -29,7 +29,7 @@ export const handleAIImage = async (ctx) => {
   log(prompt, 'Prompt to AI image handler:');
 
   if (!prompt) {
-    await ctx.reply('⚠️ No input provided.', { reply_to_message_id: ctx.message.message_id });
+    await ctx.reply('⚠️ No input provided.', { reply_to_message_id: ctx.message?.message_id });
     return;
   }
 
@@ -40,35 +40,44 @@ export const handleAIImage = async (ctx) => {
     let imageSent = false;
     let lastResponse = null;
 
-    if (images) imageURL = await getLargestPhotoUrl(ctx, images);
+    if (images && images.length > 0) {
+      imageURL = await getLargestPhotoUrl(ctx, images);
+    }
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !imageSent; attempt++) {
       console.log(`Attempt ${attempt} to generate image...`);
 
-      if (imageURL) {
-        const contents = await prepareAIImageContent(prompt, imageURL);
-        lastResponse = await generateAIImage(contents);
-      } else {
-        lastResponse = await generateAIImage(prompt);
-      }
+      try {
+        if (imageURL) {
+          const contents = await prepareAIImageContent(prompt, imageURL);
+          lastResponse = await generateAIImage(contents);
+        } else {
+          lastResponse = await generateAIImage(prompt);
+        }
 
-      imageSent = await sendImageFromResponse(ctx, lastResponse);
+        imageSent = await sendImageFromResponse(ctx, lastResponse);
 
-      if (!imageSent && attempt < MAX_ATTEMPTS) {
-        await delay(RETRY_DELAY_MS);
+        if (!imageSent && attempt < MAX_ATTEMPTS) {
+          await delay(RETRY_DELAY_MS);
+        }
+      } catch (genErr) {
+        console.error(`Error during image generation attempt ${attempt}:`, genErr);
+        lastResponse = genErr;
+        if (attempt < MAX_ATTEMPTS) {
+          await delay(RETRY_DELAY_MS);
+        }
       }
     }
 
     if (!imageSent) {
       console.warn('AI generated or edited no image: ', lastResponse);
-
-      const fallbackMessage = 'AI generated or edited no image. Try again...';
-      await ctx.reply(`⚠️ ${fallbackMessage}`, { reply_to_message_id: ctx.message.message_id });
+      const fallbackMessage = 'AI could not generate or edit an image. Please try again later.';
+      await ctx.reply(`⚠️ ${fallbackMessage}`, { reply_to_message_id: ctx.message?.message_id });
     }
 
   } catch (err) {
     console.error('Error while processing the image request:', err);
-    const errorMessage = err?.error?.message || '⚠️ Error while processing the image request. Try again...';
-    await ctx.reply(errorMessage, { reply_to_message_id: ctx.message.message_id });
+    const errorMessage = err?.error?.message || '⚠️ Error while processing the image request. Please try again later.';
+    await ctx.reply(errorMessage, { reply_to_message_id: ctx.message?.message_id });
   }
 }
