@@ -1,5 +1,5 @@
-import { getAIImageGenerationResponse } from '../services/aiService.js';
-import { getImagesToProcess, getLargestPhotoUrl } from '../utils/image.js';
+import { generateAIImage } from '../services/aiService.js';
+import { getImagesToProcess, getLargestPhotoUrl, prepareAIImageContent } from '../utils/image.js';
 import { getMessage } from '../utils/text.js';
 import { log } from '../utils/logger.js';
 
@@ -26,26 +26,32 @@ export const handleAIImage = async (ctx) => {
   const prompt = getMessage(ctx);
   const images = getImagesToProcess(ctx);
 
+  log(prompt, 'Prompt to AI image handler:');
+
   if (!prompt) {
     await ctx.reply('⚠️ No input provided.', { reply_to_message_id: ctx.message.message_id });
     return;
   }
 
-  log(prompt, 'AI image generation or edit input:');
-
   try {
     await ctx.sendChatAction('upload_photo');
 
-    let fileUrl = null;
+    let imageURL = null;
     let imageSent = false;
     let lastResponse = null;
 
-    if (images) fileUrl = await getLargestPhotoUrl(ctx, images);
+    if (images) imageURL = await getLargestPhotoUrl(ctx, images);
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !imageSent; attempt++) {
       console.log(`Attempt ${attempt} to generate image...`);
 
-      lastResponse = await getAIImageGenerationResponse(prompt, fileUrl);
+      if (imageURL) {
+        const contents = await prepareAIImageContent(caption, imageURL);
+        lastResponse = await generateAIImage(contents);
+      } else {
+        lastResponse = await generateAIImage(prompt);
+      }
+
       imageSent = await sendImageFromResponse(ctx, lastResponse);
 
       if (!imageSent && attempt < MAX_ATTEMPTS) {
@@ -54,7 +60,8 @@ export const handleAIImage = async (ctx) => {
     }
 
     if (!imageSent) {
-      log(lastResponse, 'AI generated or edited no image: ');
+      console.warn('AI generated or edited no image: ', lastResponse);
+
       const fallbackMessage = 'AI generated or edited no image. Try again...';
       await ctx.reply(`⚠️ ${fallbackMessage}`, { reply_to_message_id: ctx.message.message_id });
     }

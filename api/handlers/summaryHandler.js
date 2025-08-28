@@ -1,8 +1,10 @@
 import { getMessagesFromDb } from '../services/dbService.js';
-import { getAISummary } from '../services/aiService.js';
+import { generateAIContent } from '../services/aiService.js';
 import { decryptText } from '../utils/crypto.js';
 
 export const handleAISummary = async (ctx) => {
+  console.log('Summary command invoked.');
+
   try {
     await ctx.sendChatAction('typing');
     const messages = await getMessagesFromDb(ctx.message.chat.id, 50);
@@ -17,8 +19,13 @@ export const handleAISummary = async (ctx) => {
       return;
     }
 
-    const summary = await getAISummary(JSON.stringify(decryptedMessages));
+    const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation.`;
+
+    const summary = await generateAIContent(JSON.stringify(decryptedMessages), systemInstruction);
+
     if (!summary) {
+      console.warn('AI returned no summary.');
+
       await ctx.reply('⚠️ AI returned no summary.', { reply_to_message_id: ctx.message.message_id });
       return;
     }
