@@ -40,3 +40,36 @@ export const getMessage = (ctx, botUsername) => {
 
 // Helper to check if message should be handled as /ai in private chat
 export const isPrivateAiMessage = (ctx) => ctx.chat?.type === 'private' && clearText(ctx.message?.text, ctx?.me)
+
+export const sendResponseInChunks = async (ctx, response) => {
+  const chunkSize = 4000;
+
+  for (let i = 0; i < response.length; i += chunkSize) {
+    const chunk = response.slice(i, i + chunkSize);
+
+    try {
+      if (i === 0) {
+        await ctx.reply(chunk, { reply_to_message_id: ctx.message.message_id });
+      } else {
+        await ctx.reply(chunk);
+      }
+    } catch (err) {
+      console.error(`Failed to send chunk: ${chunk}`, err);
+      // Continue to the next chunk even if one fails
+    }
+  }
+};
+
+export const sendImageFromResponse = async (ctx, response) => {
+  const parts = response?.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find((part) => part?.inlineData?.data);
+  if (imagePart) {
+    const buffer = Buffer.from(imagePart.inlineData.data, 'base64');
+    await ctx.replyWithPhoto(
+      { source: buffer },
+      { reply_to_message_id: ctx.message.message_id }
+    );
+    return true;
+  }
+  return false;
+};

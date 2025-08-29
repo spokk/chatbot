@@ -30,6 +30,8 @@ function pcmBufferToWavBuffer(pcmBuffer, channels = 1, rate = 24000, sampleWidth
 export const handleAITextToSpeech = async (ctx) => {
   const prompt = getMessage(ctx);
 
+  console.log('TTS command invoked.');
+
   if (!prompt) {
     await ctx.reply(
       '⚠️ No input provided. Please send a prompt for voice generation.',

@@ -1,6 +1,5 @@
 import removeMarkdown from 'remove-markdown';
 
-// Helper function to download the image as a buffer
 export const downloadImageAsBuffer = async (imageURL) => {
   const response = await fetch(imageURL);
 
@@ -12,7 +11,8 @@ export const downloadImageAsBuffer = async (imageURL) => {
   return Buffer.from(arrayBuffer);
 };
 
-// Helper function to handle timeouts
+export const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
 export const withTimeout = async (promise, timeoutMs) => {
   const timeout = new Promise((resolve) =>
     setTimeout(() => resolve({ text: '⚠️ AI is taking too long to respond.' }), timeoutMs)
