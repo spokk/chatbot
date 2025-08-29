@@ -12,7 +12,7 @@ No explanations, no filler, no extra context.
 No speculation or invented details.
 `;
 const BASE_MODEL = "gemini-2.5-flash"
-const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
+const IMG_MODEL = "gemini-2.5-flash-image-preview"
 const VOICE_MODEL = "gemini-2.5-flash-preview-tts"
 
 const safetySettings = [
