@@ -1,3 +1,11 @@
+export const isCommand = (ctx, command) => {
+  const text = ctx.message?.caption || ctx.message?.text || '';
+  return text.startsWith(command) || text.startsWith(`${command}@${ctx.me}`);
+};
+
+export const getIsAiCommand = (ctx) => isCommand(ctx, '/ai');
+export const getIsGenCommand = (ctx) => isCommand(ctx, '/gen');
+
 export const clearText = (text, botUsername) => {
   if (typeof text !== 'string') return '';
 

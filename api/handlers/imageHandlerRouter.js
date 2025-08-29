@@ -1,4 +1,5 @@
-import { getIsGenCommand, getIsAiCommand } from '../utils/image.js';
+import { getIsGenCommand, getIsAiCommand } from '../utils/text.js';
+
 import { handleAIImage } from './aiImageHandler.js';
 import { handleAIMessage } from './aiHandler.js';
 
