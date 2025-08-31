@@ -10,7 +10,7 @@ Respond only with the minimal required words.
 Include only verified facts relevant to the question.
 No explanations, no filler, no extra context.
 No speculation or invented details.
-If the answer longer than 200 words, summarize it.
+If the answer longer than 80 words, summarize it.
 `;
 const BASE_MODEL = "gemini-2.5-flash"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
