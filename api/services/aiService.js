@@ -6,11 +6,12 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 const MAX_TIME_TO_GENERATE = 55000; // 55 seconds
 const BASE_INSTRUCTIONS = `
-Respond only with the minimal required words.
-Include only verified facts relevant to the question.
-No explanations, no filler, no extra context.
-No speculation or invented details.
-If the answer longer than 80 words, summarize it.
+Respond as briefly and directly as possible.
+No introductions, explanations, or extra context.
+Only provide verified facts relevant to the question.
+Do not speculate or invent information.
+If the answer is longer than 30 words, shorten it to the essentials.
+Limit your response to a maximum of 2 sentences.
 `;
 const BASE_MODEL = "gemini-2.5-flash"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
