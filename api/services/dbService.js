@@ -110,47 +110,29 @@ export const extractMessageData = (body) => {
   };
 };
 
-const getRole = userName => userName === BOT_NAME ? "model" : "user";
-
 export const buildAIHistory = async (ctx) => {
   const messages = await getMessagesFromDb(ctx.message.chat.id, 18);
 
-  if (!Array.isArray(messages) || messages.length === 0) return [];
+  if (!messages?.length) return [];
 
   const history = [];
-  let lastRole = null;
-  let currentTexts = [];
+  let prevRole = null;
 
   for (const { userName, message } of messages) {
+    const role = userName === BOT_NAME ? "model" : "user";;
+
     const text = decryptText(message);
-    const role = getRole(userName);
 
-    if (role === lastRole) {
-      currentTexts.push(text);
-    } else {
-      if (lastRole) {
-        history.push({
-          role: lastRole,
-          parts: [{ text: currentTexts.join('\n') }]
-        });
-      }
-      lastRole = role;
-      currentTexts = [text];
+    // If previous was user and current is user, insert empty model before current user
+    if (prevRole === "user" && role === "user") {
+      history.push({ role: "model", parts: [{ text: "" }] });
     }
+
+    history.push({ role, parts: [{ text }] });
+    prevRole = role;
   }
 
-  if (currentTexts.length > 0 && lastRole) {
-    history.push({
-      role: lastRole,
-      parts: [{ text: currentTexts.join('\n') }]
-    });
-  }
-
-  if (history.some(h => h.role === "user") && !history.some(h => h.role === "model")) {
-    history.push({ role: "model", parts: [{ text: "" }] });
-  }
-
-  log(history, `Built AI history for chatId ${ctx.message.chat.id}:`);
+  log(history, `History for chatId ${ctx.message.chat.id}:`);
 
   return history;
 };
