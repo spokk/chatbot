@@ -30,7 +30,7 @@ export const decryptText = (encryptedText) => {
     decrypted += decipher.final('utf8');
     return decrypted;
   } catch (err) {
-    logger.error(err, 'Decryption failed:');
+    logger.error({ err }, 'Decryption failed:');
     return encryptedText; // Return the original text if decryption fails
   }
 };

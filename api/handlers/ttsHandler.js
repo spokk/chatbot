@@ -46,7 +46,7 @@ export const handleAITextToSpeech = async (ctx) => {
 
     const response = await generateAIVoice(prompt);
 
-    logger.info(response, 'AI voice generation response:');
+    logger.info({ response }, 'AI voice generation response:');
 
     const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 
@@ -68,12 +68,12 @@ export const handleAITextToSpeech = async (ctx) => {
       ctx.deleteMessage(ctx.message.message_id).catch(() => { });
       await ctx.replyWithAudio({ source: wavBuffer }, { title: prompt, performer: 'AI Voice' });
     } catch (err) {
-      logger.error(err, 'Error converting audio buffer to WAV:');
+      logger.error({ err }, 'Error converting audio buffer to WAV:');
       await ctx.reply('⚠️ Error while converting audio data. Try again...', { reply_to_message_id: ctx.message.message_id });
     }
 
   } catch (err) {
-    logger.error(err, 'Error processing voice request:');
+    logger.error({ err }, 'Error processing voice request:');
 
     // Handle 429 Too Many Requests
     if (err?.response?.status === 429 || err?.message?.includes('429')) {

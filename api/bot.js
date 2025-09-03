@@ -43,7 +43,7 @@ export default async (req, res) => {
     await Promise.all([bot.handleUpdate(req.body), insertMessageToDb(req.body)]);
     res.status(200).send('OK');
   } catch (err) {
-    logger.error(err, 'Bot handling failed:');
+    logger.error({ err }, 'Bot handling failed:');
     res.status(500).send('Error processing bot handling.');
   }
 };

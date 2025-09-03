@@ -9,7 +9,7 @@ export const handleAIImage = async (ctx) => {
   const prompt = getMessage(ctx);
   const images = getImagesToProcess(ctx);
 
-  logger.info(prompt, 'Prompt to AI image handler:');
+  logger.info({ prompt }, 'Prompt to AI image handler:');
 
   if (!prompt) {
     await ctx.reply('⚠️ No input provided.', { reply_to_message_id: ctx.message?.message_id });
@@ -41,14 +41,14 @@ export const handleAIImage = async (ctx) => {
       imageSent = await sendImageFromResponse(ctx, lastResponse);
       if (!imageSent && attempt < MAX_ATTEMPTS) await delay(RETRY_DELAY_MS);
     } catch (err) {
-      logger.error(err, `Error during image generation attempt ${attempt}:`);
+      logger.error({ err }, `Error during image generation attempt ${attempt}:`);
       lastResponse = err;
       if (attempt < MAX_ATTEMPTS) await delay(RETRY_DELAY_MS);
     }
   }
 
   if (!imageSent) {
-    logger.warn(lastResponse, 'AI generated or edited no image: ');
+    logger.warn({ lastResponse }, 'AI generated or edited no image: ');
     await ctx.reply(
       '⚠️ AI could not generate or edit an image. Please try again later.',
       { reply_to_message_id: ctx.message?.message_id }

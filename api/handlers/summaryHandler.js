@@ -34,7 +34,7 @@ export const handleAISummary = async (ctx) => {
 
     await ctx.reply(summary, { reply_to_message_id: ctx.message.message_id });
   } catch (err) {
-    logger.error(err, 'Summary request error:');
+    logger.error({ err }, 'Summary request error:');
     const errorMessage = err?.error?.message || '⚠️ Error while processing summary request. Try again...';
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message.message_id });
   }

@@ -10,7 +10,7 @@ export const handleAIMessage = async (ctx) => {
   const prompt = getMessage(ctx);
   const images = getImagesToProcess(ctx);
 
-  logger.info(prompt, 'Prompt to AI message handler:');
+  logger.info({ prompt }, 'Prompt to AI message handler:');
 
   if (!prompt && !images) {
     await ctx.reply(
@@ -41,13 +41,13 @@ export const handleAIMessage = async (ctx) => {
       return;
     }
 
-    logger.info(response, 'Response from AI message handler:');
+    logger.info({ response }, 'Response from AI message handler:');
     await Promise.all([
       sendResponseInChunks(ctx, response),
       insertAIResponseToDb(ctx, response)
     ]);
   } catch (err) {
-    logger.error(err, 'AI request error:');
+    logger.error({ err }, 'AI request error:');
     const errorMessage = err?.error?.message || '⚠️ Error while communicating with AI. Try again...';
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message?.message_id });
   }

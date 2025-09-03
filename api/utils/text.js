@@ -64,7 +64,7 @@ export const sendResponseInChunks = async (ctx, response) => {
         await ctx.reply(chunk);
       }
     } catch (err) {
-      logger.error(err, `Failed to send chunk: ${chunk}`);
+      logger.error({ err }, `Failed to send chunk: ${chunk}`);
       // Continue to the next chunk even if one fails
     }
   }

@@ -23,7 +23,7 @@ export const connectToDb = async () => {
         minPoolSize: 2,  // Optional: keep some connections always open
       });
       await client.connect();
-      logger.info('MongoDB connected successfully.');
+      logger.debug('MongoDB connected successfully.');
       return client;
     })();
   }
@@ -51,7 +51,7 @@ export const getMessagesFromDb = async (chatId, limit = 50) => {
 
     return messages.reverse(); // Reverse to get chronological order (oldest to newest)
   } catch (err) {
-    logger.error(err, `Error fetching messages for chatId ${chatId}:`);
+    logger.error({ err }, `Error fetching messages for chatId ${chatId}:`);
     throw new Error('Failed to fetch messages from DB.');
   }
 }
@@ -133,7 +133,7 @@ export const buildAIHistory = async (ctx) => {
     prevRole = role;
   }
 
-  logger.info(history, `History for chatId ${ctx.message.chat.id}:`);
+  logger.info({ history }, 'Chat history');
 
   return history;
 };
