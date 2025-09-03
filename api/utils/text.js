@@ -1,3 +1,5 @@
+import { logger } from './logger.js';
+
 export const isCommand = (ctx, command) => {
   const text = ctx.message?.caption || ctx.message?.text || '';
   return text.startsWith(command) || text.startsWith(`${command}@${ctx.me}`);
@@ -62,7 +64,7 @@ export const sendResponseInChunks = async (ctx, response) => {
         await ctx.reply(chunk);
       }
     } catch (err) {
-      console.error(`Failed to send chunk: ${chunk}`, err);
+      logger.error(err, `Failed to send chunk: ${chunk}`);
       // Continue to the next chunk even if one fails
     }
   }

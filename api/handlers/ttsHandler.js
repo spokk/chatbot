@@ -3,7 +3,8 @@ import { Readable } from 'stream';
 
 import { generateAIVoice } from '../services/aiService.js';
 import { getMessage } from '../utils/text.js';
-import { log } from '../utils/logger.js';
+
+import { logger } from '../utils/logger.js';
 
 
 function pcmBufferToWavBuffer(pcmBuffer, channels = 1, rate = 24000, sampleWidth = 2) {
@@ -30,7 +31,7 @@ function pcmBufferToWavBuffer(pcmBuffer, channels = 1, rate = 24000, sampleWidth
 export const handleAITextToSpeech = async (ctx) => {
   const prompt = getMessage(ctx);
 
-  console.log('TTS command invoked.');
+  logger.info('TTS command invoked.');
 
   if (!prompt) {
     await ctx.reply(
@@ -45,7 +46,7 @@ export const handleAITextToSpeech = async (ctx) => {
 
     const response = await generateAIVoice(prompt);
 
-    log(response, 'AI voice generation response:');
+    logger.info(response, 'AI voice generation response:');
 
     const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 
@@ -67,12 +68,12 @@ export const handleAITextToSpeech = async (ctx) => {
       ctx.deleteMessage(ctx.message.message_id).catch(() => { });
       await ctx.replyWithAudio({ source: wavBuffer }, { title: prompt, performer: 'AI Voice' });
     } catch (err) {
-      console.error('Error converting audio buffer to WAV:', err);
+      logger.error(err, 'Error converting audio buffer to WAV:');
       await ctx.reply('⚠️ Error while converting audio data. Try again...', { reply_to_message_id: ctx.message.message_id });
     }
 
   } catch (err) {
-    console.error('Error processing voice request:', err);
+    logger.error(err, 'Error processing voice request:');
 
     // Handle 429 Too Many Requests
     if (err?.response?.status === 429 || err?.message?.includes('429')) {

@@ -4,13 +4,13 @@ import { insertAIResponseToDb, buildAIHistory } from '../services/dbService.js';
 import { getImagesToProcess, getLargestPhotoUrl, prepareAIImageContent } from '../utils/image.js';
 import { getMessage, sendResponseInChunks } from '../utils/text.js';
 
-import { log } from '../utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 export const handleAIMessage = async (ctx) => {
   const prompt = getMessage(ctx);
   const images = getImagesToProcess(ctx);
 
-  log(prompt, 'Prompt to AI message handler:');
+  logger.info(prompt, 'Prompt to AI message handler:');
 
   if (!prompt && !images) {
     await ctx.reply(
@@ -41,13 +41,13 @@ export const handleAIMessage = async (ctx) => {
       return;
     }
 
-    log(response, 'Response from AI message handler:');
+    logger.info(response, 'Response from AI message handler:');
     await Promise.all([
       sendResponseInChunks(ctx, response),
       insertAIResponseToDb(ctx, response)
     ]);
   } catch (err) {
-    console.error('AI request error:', err);
+    logger.error(err, 'AI request error:');
     const errorMessage = err?.error?.message || '⚠️ Error while communicating with AI. Try again...';
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message?.message_id });
   }

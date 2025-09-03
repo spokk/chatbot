@@ -2,7 +2,8 @@ import { MongoClient } from 'mongodb';
 
 import { encryptText, decryptText } from '../utils/crypto.js';
 import { getMessage } from '../utils/text.js';
-import { log } from '../utils/logger.js';
+
+import { logger } from '../utils/logger.js';
 
 let clientPromise; // Use a promise to avoid race conditions
 
@@ -22,7 +23,7 @@ export const connectToDb = async () => {
         minPoolSize: 2,  // Optional: keep some connections always open
       });
       await client.connect();
-      console.log('MongoDB connected successfully.');
+      logger.info('MongoDB connected successfully.');
       return client;
     })();
   }
@@ -50,7 +51,7 @@ export const getMessagesFromDb = async (chatId, limit = 50) => {
 
     return messages.reverse(); // Reverse to get chronological order (oldest to newest)
   } catch (err) {
-    console.error(`Error fetching messages for chatId ${chatId}:`, err);
+    logger.error(err, `Error fetching messages for chatId ${chatId}:`);
     throw new Error('Failed to fetch messages from DB.');
   }
 }
@@ -132,7 +133,7 @@ export const buildAIHistory = async (ctx) => {
     prevRole = role;
   }
 
-  log(history, `History for chatId ${ctx.message.chat.id}:`);
+  logger.info(history, `History for chatId ${ctx.message.chat.id}:`);
 
   return history;
 };

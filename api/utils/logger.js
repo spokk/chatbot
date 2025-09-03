@@ -1,3 +1,20 @@
-export const log = (data, name = "Default log:") => {
-  console.log(name, JSON.stringify(data, null, 2));
-};
+import pino from "pino";
+
+const streams = [
+  { level: 'info', stream: process.stdout },
+  { level: 'warn', stream: process.stderr },
+  { level: 'error', stream: process.stderr },
+];
+
+export const logger = pino({
+  level: "info",
+  base: undefined,
+  timestamp: false,
+  messageKey: "log",
+  formatters: {
+    level() {
+      return {};
+    }
+  }
+},
+  pino.multistream(streams));

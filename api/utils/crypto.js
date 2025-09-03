@@ -1,5 +1,7 @@
 import crypto from 'crypto'
 
+import { logger } from './logger.js';
+
 // Encryption configuration
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 const ALGORITHM = process.env.ALGORITHM;
@@ -28,7 +30,7 @@ export const decryptText = (encryptedText) => {
     decrypted += decipher.final('utf8');
     return decrypted;
   } catch (err) {
-    console.error('Decryption failed:', err);
+    logger.error(err, 'Decryption failed:');
     return encryptedText; // Return the original text if decryption fails
   }
 };

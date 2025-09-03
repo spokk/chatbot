@@ -2,8 +2,10 @@ import { getMessagesFromDb } from '../services/dbService.js';
 import { generateAIContent } from '../services/aiService.js';
 import { decryptText } from '../utils/crypto.js';
 
+import { logger } from '../utils/logger.js';
+
 export const handleAISummary = async (ctx) => {
-  console.log('Summary command invoked.');
+  logger.info('Summary command invoked.');
 
   try {
     await ctx.sendChatAction('typing');
@@ -24,7 +26,7 @@ export const handleAISummary = async (ctx) => {
     const summary = await generateAIContent(JSON.stringify(decryptedMessages), systemInstruction);
 
     if (!summary) {
-      console.warn('AI returned no summary.');
+      logger.warn('AI returned no summary.');
 
       await ctx.reply('⚠️ AI returned no summary.', { reply_to_message_id: ctx.message.message_id });
       return;
@@ -32,7 +34,7 @@ export const handleAISummary = async (ctx) => {
 
     await ctx.reply(summary, { reply_to_message_id: ctx.message.message_id });
   } catch (err) {
-    console.error('Summary request error:', err);
+    logger.error(err, 'Summary request error:');
     const errorMessage = err?.error?.message || '⚠️ Error while processing summary request. Try again...';
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message.message_id });
   }
