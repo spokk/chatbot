@@ -4,7 +4,7 @@
   "main": "api/bot.js",
   "type": "module",
   "scripts": {
-    "deploy": "vercel --prod"
+    "deploy": "npx vercel --prod"
   },
   "keywords": [],
   "author": "spokk",
