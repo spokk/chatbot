@@ -1,6 +1,6 @@
 import removeMarkdown from 'remove-markdown';
 
-import { logger } from './logger';
+import { logger } from './logger.js';
 
 export const downloadImageAsBuffer = async (imageURL) => {
   const response = await fetch(imageURL);
