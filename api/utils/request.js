@@ -23,5 +23,10 @@ export const withTimeout = async (promise, timeoutMs) => {
 export const handleAIResponse = async (aiRequest, timeout) => {
   const response = await withTimeout(aiRequest, timeout);
 
-  return response?.text ? removeMarkdown(response.text) : null;
+  if (!response?.text) {
+    logger.error({ response }, "Empty or invalid response from Gemini AI.");
+    return null;
+  }
+
+  return removeMarkdown(response.text);
 };
