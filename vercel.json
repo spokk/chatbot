@@ -1,18 +1,19 @@
 {
-  "version": 2,
-  "regions": [
-    "iad1"
-  ],
+  "buildCommand": "npm run build && node scripts/set-commands.js",
   "builds": [
     {
       "src": "api/bot.js",
       "use": "@vercel/node"
     }
   ],
+  "regions": [
+    "iad1"
+  ],
   "routes": [
     {
-      "src": "/api/bot",
-      "dest": "/api/bot.js"
+      "dest": "/api/bot.js",
+      "src": "/api/bot"
     }
-  ]
+  ],
+  "version": 2
 }
