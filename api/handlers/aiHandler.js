@@ -2,7 +2,7 @@ import { requestAIChat, generateAIContent } from '../services/aiService.js';
 import { insertAIResponseToDb, buildAIHistory } from '../services/dbService.js';
 
 import { getImagesToProcess, getLargestPhotoUrl, prepareAIImageContent } from '../utils/image.js';
-import { getMessage, sendResponseInChunks } from '../utils/text.js';
+import { getMessage, getErrorMessage, sendResponseInChunks } from '../utils/text.js';
 
 import { logger } from '../utils/logger.js';
 
@@ -49,20 +49,7 @@ export const handleAIMessage = async (ctx) => {
   } catch (err) {
     logger.error({ err }, 'AI request error:');
 
-    let errorMessage = '⚠️ Error while communicating with AI. Try again...';
-
-    try {
-      // Some errors come as JSON in err.message
-      const parsed = JSON.parse(err.message);
-      if (parsed?.error?.message) {
-        errorMessage = parsed.error.message;
-      }
-    } catch {
-      // if not JSON, just use err.message if it exists
-      if (err?.message) {
-        errorMessage = `⚠️ ${err.message}`;
-      }
-    }
+    const errorMessage = getErrorMessage(err, '⚠️ Error while communicating with AI. Try again...')
 
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message?.message_id });
   }

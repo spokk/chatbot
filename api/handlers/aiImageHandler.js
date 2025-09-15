@@ -49,6 +49,7 @@ export const handleAIImage = async (ctx) => {
 
   if (!imageSent) {
     logger.warn({ lastResponse }, 'AI generated or edited no image: ');
+
     await ctx.reply(
       '⚠️ AI could not generate or edit an image. Please try again later.',
       { reply_to_message_id: ctx.message?.message_id }

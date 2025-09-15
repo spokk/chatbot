@@ -1,7 +1,8 @@
 import { getMessagesFromDb } from '../services/dbService.js';
 import { generateAIContent } from '../services/aiService.js';
-import { decryptText } from '../utils/crypto.js';
 
+import { decryptText } from '../utils/crypto.js';
+import { getErrorMessage } from '../utils/text.js';
 import { logger } from '../utils/logger.js';
 
 export const handleAISummary = async (ctx) => {
@@ -35,7 +36,9 @@ export const handleAISummary = async (ctx) => {
     await ctx.reply(summary, { reply_to_message_id: ctx.message.message_id });
   } catch (err) {
     logger.error({ err }, 'Summary request error:');
-    const errorMessage = err?.error?.message || '⚠️ Error while processing summary request. Try again...';
+
+    const errorMessage = getErrorMessage(err, '⚠️ Error while processing summary request. Try again...')
+
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message.message_id });
   }
 };

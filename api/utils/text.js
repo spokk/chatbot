@@ -83,3 +83,22 @@ export const sendImageFromResponse = async (ctx, response) => {
   }
   return false;
 };
+
+export const getErrorMessage = (err, defaultMessage = '') => {
+  let errorMessage = null;
+
+  try {
+    // Some errors come as JSON in err.message
+    const parsed = JSON.parse(err.message);
+    if (parsed?.error?.message) {
+      errorMessage = parsed.error.message;
+    }
+  } catch {
+    // if not JSON, just use err.message if it exists
+    if (err?.message) {
+      errorMessage = err.message;
+    }
+  }
+
+  return `⚠️ ${errorMessage}` || defaultMessage || '⚠️ An unexpected error occurred. Please try again.';
+}

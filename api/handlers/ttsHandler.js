@@ -2,7 +2,7 @@ import wav from 'wav';
 import { Readable } from 'stream';
 
 import { generateAIVoice } from '../services/aiService.js';
-import { getMessage } from '../utils/text.js';
+import { getMessage, getErrorMessage } from '../utils/text.js';
 
 import { logger } from '../utils/logger.js';
 
@@ -69,6 +69,7 @@ export const handleAITextToSpeech = async (ctx) => {
       await ctx.replyWithAudio({ source: wavBuffer }, { title: prompt, performer: 'AI Voice' });
     } catch (err) {
       logger.error({ err }, 'Error converting audio buffer to WAV:');
+
       await ctx.reply('⚠️ Error while converting audio data. Try again...', { reply_to_message_id: ctx.message.message_id });
     }
 
@@ -84,7 +85,8 @@ export const handleAITextToSpeech = async (ctx) => {
       return;
     }
 
-    const errorMessage = err?.error?.message || '⚠️ Error while processing the voice generation request. Try again...';
+    const errorMessage = getErrorMessage(err, '⚠️ Error while processing the voice generation request. Try again...')
+
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message.message_id });
   }
 }
