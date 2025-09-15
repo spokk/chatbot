@@ -60,7 +60,7 @@ export const handleAIMessage = async (ctx) => {
     } catch {
       // if not JSON, just use err.message if it exists
       if (err?.message) {
-        errorMessage = err.message;
+        errorMessage = `⚠️ ${err.message}`;
       }
     }
 
