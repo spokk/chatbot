@@ -4,7 +4,8 @@
   "main": "api/bot.js",
   "type": "module",
   "scripts": {
-    "deploy": "npx vercel --prod"
+    "set-commands": "node api/scripts/set-commands.js",
+    "deploy": "npx vercel --prod && npm run set-commands"
   },
   "keywords": [],
   "author": "spokk",

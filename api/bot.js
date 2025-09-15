@@ -13,13 +13,6 @@ import { logger } from './utils/logger.js';
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
-bot.telegram.setMyCommands([
-  { command: 'ai', description: 'Ask anything (text or image).' },
-  { command: 'sum', description: 'Summarize the latest messages.' },
-  { command: 'gen', description: 'Generate or modify an image.' },
-  { command: 'voice', description: 'Convert text to speech.' },
-]);
-
 bot.command('ai', handleAIMessage);
 bot.command('sum', handleAISummary);
 bot.command('gen', handleAIImage);
