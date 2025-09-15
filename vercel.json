@@ -1,5 +1,4 @@
 {
-  "buildCommand": "npm run build && node scripts/set-commands.js",
   "builds": [
     {
       "src": "api/bot.js",
