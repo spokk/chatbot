@@ -1,6 +1,6 @@
 import { generateAIImage } from '../services/aiService.js';
 import { getImagesToProcess, getLargestPhotoUrl, prepareAIImageContent } from '../utils/image.js';
-import { getMessage, sendImageFromResponse } from '../utils/text.js';
+import { getMessage, getErrorMessage, sendImageFromResponse } from '../utils/text.js';
 import { delay } from '../utils/request.js';
 
 import { logger } from '../utils/logger.js';
@@ -50,9 +50,8 @@ export const handleAIImage = async (ctx) => {
   if (!imageSent) {
     logger.warn({ lastResponse }, 'AI generated or edited no image: ');
 
-    await ctx.reply(
-      '⚠️ AI could not generate or edit an image. Please try again later.',
-      { reply_to_message_id: ctx.message?.message_id }
-    );
+    const errorMessage = getErrorMessage(lastResponse, '⚠️ AI could not generate or edit an image. Please try again later.')
+
+    await ctx.reply(errorMessage, { reply_to_message_id: ctx.message?.message_id });
   }
 };
