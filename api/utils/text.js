@@ -100,5 +100,17 @@ export const getErrorMessage = (err, defaultMessage = '') => {
     }
   }
 
-  return `⚠️ ${errorMessage}` || defaultMessage || '⚠️ An unexpected error occurred. Please try again.';
-}
+  // Check Gemini-style candidate response
+  if (!errorMessage && err?.lastResponse?.candidates?.length) {
+    const firstText = err.lastResponse.candidates[0]?.content?.parts?.[0]?.text;
+    if (firstText) {
+      errorMessage = firstText;
+    }
+  }
+
+  return (
+    (errorMessage ? `⚠️ ${errorMessage}` : '') ||
+    defaultMessage ||
+    '⚠️ An unexpected error occurred. Please try again.'
+  );
+};

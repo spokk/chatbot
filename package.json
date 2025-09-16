@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "set-commands": "node api/scripts/set-commands.js",
-    "deploy": "npx vercel --prod && npm run set-commands"
+    "deploy": "npx vercel --prod"
   },
   "keywords": [],
   "author": "spokk",

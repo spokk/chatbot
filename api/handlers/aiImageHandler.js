@@ -5,6 +5,14 @@ import { delay } from '../utils/request.js';
 
 import { logger } from '../utils/logger.js';
 
+const tryGenerateAndSend = async (prompt, imageURL) => {
+  if (imageURL) {
+    const contents = await prepareAIImageContent(prompt, imageURL);
+    return generateAIImage(contents);
+  }
+  return generateAIImage(prompt);
+};
+
 export const handleAIImage = async (ctx) => {
   const prompt = getMessage(ctx);
   const images = getImagesToProcess(ctx);
@@ -27,22 +35,17 @@ export const handleAIImage = async (ctx) => {
     ? await getLargestPhotoUrl(ctx, images)
     : null;
 
-  const tryGenerateAndSend = async () => {
-    if (imageURL) {
-      const contents = await prepareAIImageContent(prompt, imageURL);
-      return generateAIImage(contents);
-    }
-    return generateAIImage(prompt);
-  };
-
   for (let attempt = 1; attempt <= MAX_ATTEMPTS && !imageSent; attempt++) {
     try {
-      lastResponse = await tryGenerateAndSend();
+      lastResponse = await tryGenerateAndSend(prompt, imageURL);
       imageSent = await sendImageFromResponse(ctx, lastResponse);
+
       if (!imageSent && attempt < MAX_ATTEMPTS) await delay(RETRY_DELAY_MS);
     } catch (err) {
       logger.error({ err }, `Error during image generation attempt ${attempt}:`);
+
       lastResponse = err;
+
       if (attempt < MAX_ATTEMPTS) await delay(RETRY_DELAY_MS);
     }
   }
@@ -53,5 +56,7 @@ export const handleAIImage = async (ctx) => {
     const errorMessage = getErrorMessage(lastResponse, '⚠️ AI could not generate or edit an image. Please try again later.')
 
     await ctx.reply(errorMessage, { reply_to_message_id: ctx.message?.message_id });
+  } else {
+    logger.info('Image successfully generated and sent.');
   }
 };
