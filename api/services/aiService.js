@@ -7,9 +7,6 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 const MAX_TIME_TO_GENERATE = 85000; // 85 seconds
 const BASE_INSTRUCTIONS = `
 Use Google Search to ground answers when possible.
-Respond directly to the user's latest message.
-Use previous messages solely for context and understanding.
-Do not quote or summarize prior messages unless explicitly requested in the latest prompt.
 Answer concisely: max 2 sentences, under 30 words.
 No greetings or extra filler; provide only relevant facts.
 Reply in the predominant language of the chat.
