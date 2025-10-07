@@ -6,10 +6,12 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
 
 const MAX_TIME_TO_GENERATE = 85000; // 85 seconds
 const BASE_INSTRUCTIONS = `
-Use Google Search to ground answers when possible.
-Answer concisely: max 2 sentences, under 30 words.
-No greetings or extra filler; provide only relevant facts.
-Reply in the predominant language of the chat.
+Use ground search for factual or current information when relevant.
+Refer to prior chat messages only for context or clarification, but respond solely to the user's latest request.
+Keep responses concise: no more than 2 sentences or 30 words.
+Avoid greetings, pleasantries, or unnecessary commentary.
+Respond in the primary language used throughout the chat history.
+Focus strictly on accuracy, clarity, and relevance.
 `;
 const BASE_MODEL = "gemini-2.5-flash"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
