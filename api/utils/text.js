@@ -41,7 +41,7 @@ export const getMessage = (ctx, botUsername) => {
 
   // Combine mainText with the first available quote/reply if both exist
   if (mainText) {
-    const secondary = quoteText || replyText || replyCaption;
+    const secondary = quoteText || replyText;
     if (secondary) {
       return `"${secondary}".\n${mainText}`;
     }
