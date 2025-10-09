@@ -32,20 +32,24 @@ export const clearText = (text, botUsername) => {
 export const getMessage = (ctx, botUsername) => {
   const resolvedBotUsername = ctx?.me || botUsername;
 
-  const candidates = [
-    ctx?.message?.text,
-    ctx?.message?.caption,
-    ctx?.message?.quote?.text,
-    ctx?.message?.reply_to_message?.text,
-    ctx?.message?.reply_to_message?.caption,
-  ];
+  // Clean all possible sources once
+  const mainText = clearText(ctx?.message?.text, resolvedBotUsername);
+  const quoteText = clearText(ctx?.message?.quote?.text, resolvedBotUsername);
+  const replyText = clearText(ctx?.message?.reply_to_message?.text, resolvedBotUsername);
+  const caption = clearText(ctx?.message?.caption, resolvedBotUsername);
+  const replyCaption = clearText(ctx?.message?.reply_to_message?.caption, resolvedBotUsername);
 
-  for (const candidate of candidates) {
-    const cleaned = clearText(candidate, resolvedBotUsername);
-    if (cleaned) return cleaned;
+  // Combine mainText with the first available quote/reply if both exist
+  if (mainText) {
+    const secondary = quoteText || replyText || replyCaption;
+    if (secondary) {
+      return `"${secondary}".\n${mainText}`;
+    }
+    return mainText;
   }
 
-  return '';
+  // Otherwise, return the first available candidate
+  return caption || quoteText || replyText || replyCaption || '';
 };
 
 // Helper to check if message should be handled as /ai in private chat
