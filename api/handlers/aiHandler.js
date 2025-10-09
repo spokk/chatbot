@@ -20,9 +20,9 @@ export const handleAIMessage = async (ctx) => {
     return;
   }
 
-  try {
-    await ctx.sendChatAction('typing');
+  await ctx.sendChatAction('typing');
 
+  try {
     let response;
     if (images) {
       const imageURL = await getLargestPhotoUrl(ctx, images);
@@ -48,10 +48,11 @@ export const handleAIMessage = async (ctx) => {
     ]);
   } catch (err) {
     logger.error({ err }, 'AI request error:');
-
-    const errorMessage = getErrorMessage(err, '⚠️ Error while communicating with AI. Try again...')
-
-    await ctx.reply(errorMessage, { reply_to_message_id: ctx.message?.message_id });
+    const errorMessage = getErrorMessage(err, '⚠️ Error while communicating with AI. Try again...');
+    await Promise.all([
+      ctx.reply(errorMessage, { reply_to_message_id: ctx.message?.message_id }),
+      insertAIResponseToDb(ctx, errorMessage)
+    ]);
   }
 };
 
