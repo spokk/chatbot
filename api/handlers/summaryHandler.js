@@ -22,7 +22,15 @@ export const handleAISummary = async (ctx) => {
       return;
     }
 
-    const systemInstruction = `This is the list of messages. Make a short summary of the key points of the conversation.`;
+    const systemInstruction = `
+    Always respond **only in Ukrainian**.
+    This is the list of messages.
+    Make a short summary of the key points of the conversation.
+    Keep responses concise: no more than 2 sentences or 30 words.
+    Avoid greetings, pleasantries, or unnecessary commentary.
+    Focus strictly on accuracy, clarity, and relevance.
+    Never repeat the same information in multiple languages.
+    `;
 
     const summary = await generateAIContent(JSON.stringify(decryptedMessages), systemInstruction);
 
