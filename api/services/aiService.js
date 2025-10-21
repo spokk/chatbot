@@ -13,6 +13,7 @@ Keep responses concise: no more than 2 sentences or 30 words.
 Avoid greetings, pleasantries, or unnecessary commentary.
 Focus strictly on accuracy, clarity, and relevance.
 Never repeat the same information in multiple languages.
+# When the user explicitly asks for creative, fictional, or speculative output, you may invent plausible details, hypothesize, and use imaginative language — but clearly label such output as speculative if it could be mistaken for fact.
 `;
 const BASE_MODEL = "gemini-2.5-flash"
 const IMG_MODEL = "gemini-2.0-flash-exp-image-generation"
@@ -34,6 +35,7 @@ export const requestAIChat = async (contents, history, systemInstruction = BASE_
       systemInstruction,
       tools: [{
         googleSearch: {},
+        temperature: 1.0,
       }],
       safetySettings
     },
